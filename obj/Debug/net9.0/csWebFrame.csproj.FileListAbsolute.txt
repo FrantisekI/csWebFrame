@@ -1,0 +1,15 @@
+C:\Users\zapot\Documents\VŠ\programovani\zapoctovyProgramFramework\csWebFrame\bin\Debug\net9.0\csWebFrame.exe
+C:\Users\zapot\Documents\VŠ\programovani\zapoctovyProgramFramework\csWebFrame\bin\Debug\net9.0\csWebFrame.deps.json
+C:\Users\zapot\Documents\VŠ\programovani\zapoctovyProgramFramework\csWebFrame\bin\Debug\net9.0\csWebFrame.runtimeconfig.json
+C:\Users\zapot\Documents\VŠ\programovani\zapoctovyProgramFramework\csWebFrame\bin\Debug\net9.0\csWebFrame.dll
+C:\Users\zapot\Documents\VŠ\programovani\zapoctovyProgramFramework\csWebFrame\bin\Debug\net9.0\csWebFrame.pdb
+C:\Users\zapot\Documents\VŠ\programovani\zapoctovyProgramFramework\csWebFrame\obj\Debug\net9.0\csWebFrame.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\zapot\Documents\VŠ\programovani\zapoctovyProgramFramework\csWebFrame\obj\Debug\net9.0\csWebFrame.AssemblyInfoInputs.cache
+C:\Users\zapot\Documents\VŠ\programovani\zapoctovyProgramFramework\csWebFrame\obj\Debug\net9.0\csWebFrame.AssemblyInfo.cs
+C:\Users\zapot\Documents\VŠ\programovani\zapoctovyProgramFramework\csWebFrame\obj\Debug\net9.0\csWebFrame.csproj.CoreCompileInputs.cache
+C:\Users\zapot\Documents\VŠ\programovani\zapoctovyProgramFramework\csWebFrame\obj\Debug\net9.0\csWebFrame.sourcelink.json
+C:\Users\zapot\Documents\VŠ\programovani\zapoctovyProgramFramework\csWebFrame\obj\Debug\net9.0\csWebFrame.dll
+C:\Users\zapot\Documents\VŠ\programovani\zapoctovyProgramFramework\csWebFrame\obj\Debug\net9.0\refint\csWebFrame.dll
+C:\Users\zapot\Documents\VŠ\programovani\zapoctovyProgramFramework\csWebFrame\obj\Debug\net9.0\csWebFrame.pdb
+C:\Users\zapot\Documents\VŠ\programovani\zapoctovyProgramFramework\csWebFrame\obj\Debug\net9.0\csWebFrame.genruntimeconfig.cache
+C:\Users\zapot\Documents\VŠ\programovani\zapoctovyProgramFramework\csWebFrame\obj\Debug\net9.0\ref\csWebFrame.dll
