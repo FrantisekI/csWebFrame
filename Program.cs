@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Net;
+using System.Drawing.Imaging;
+using System.Data.SqlTypes;
 
 namespace MyApplication
 {
@@ -9,8 +11,53 @@ namespace MyApplication
         {
             Console.WriteLine("Hello, World!");
 
+
             SimpleListenerExample(new string[] { "http://localhost:8060/" });
         }
+
+        public static byte[] ReadFile(string filePath)
+        {
+            if (filePath.EndsWith('/'))
+                filePath = filePath + "index.html";
+            filePath = filePath.Substring(1);
+            
+            string basePath = System.AppDomain.CurrentDomain.BaseDirectory;
+            string projectPath = Path.GetFullPath(Path.Combine(basePath, @"..\..\.."));
+            string pathSource = Path.Combine(projectPath, filePath);
+            try
+            {
+
+                using (FileStream fsSource = new FileStream(pathSource,
+                    FileMode.Open, FileAccess.Read))
+                {
+                    // Read the source file into a byte array.
+                    byte[] bytes = new byte[fsSource.Length];
+                    int numBytesToRead = (int)fsSource.Length;
+                    int numBytesRead = 0;
+                    while (numBytesToRead > 0)
+                    {
+                        // Read may return anything from 0 to numBytesToRead.
+                        int n = fsSource.Read(bytes, numBytesRead, numBytesToRead);
+
+                        // Break when the end of the file is reached.
+                        if (n == 0)
+                            break;
+
+                        numBytesRead += n;
+                        numBytesToRead -= n;
+                    }
+                    numBytesToRead = bytes.Length;
+
+                    return bytes;
+                }
+            }
+            catch (FileNotFoundException ioEx)
+            {
+                Console.WriteLine(ioEx.Message);
+            }
+            return [];
+        }
+
 
         // This example requires the System and System.Net namespaces.
         public static void SimpleListenerExample(string[] prefixes)
@@ -21,7 +68,6 @@ namespace MyApplication
                 return;
             }
             // URI prefixes are required,
-            // for example "http://contoso.com:8080/index/".
             if (prefixes == null || prefixes.Length == 0)
                 throw new ArgumentException("prefixes");
 
@@ -33,7 +79,7 @@ namespace MyApplication
                 listener.Prefixes.Add(s);
             }
             listener.Start();
-            Console.WriteLine("Listening...");
+            Console.WriteLine("Listening... on {0}", prefixes);
             while (listener.IsListening)
             {
                 // Note: The GetContext method blocks while waiting for a request.
@@ -41,14 +87,22 @@ namespace MyApplication
                 HttpListenerRequest request = context.Request;
                 // Obtain a response object.
                 HttpListenerResponse response = context.Response;
-                Console.WriteLine($"Received request: {request.HttpMethod} {request.Url}");
-                // Construct a response.
-                string responseString = "<HTML><BODY> Hello world! <img src='vobrazek'>bob</img></BODY></HTML>";
-                byte[] buffer = System.Text.Encoding.UTF8.GetBytes(responseString);
+                if (request.Url == null)
+                {
+                    Console.WriteLine("Request URL is null.");
+                    continue;
+                }
+                else
+                    Console.WriteLine($"Received request: {request.HttpMethod} {request.Url.AbsolutePath}");
+
+                //byte[] buffer = System.Text.Encoding.UTF8.GetBytes(responseString);
+                byte[] buffer = ReadFile(request.Url.AbsolutePath);
+
                 // Get a response stream and write the response to it.
                 response.ContentLength64 = buffer.Length;
                 System.IO.Stream output = response.OutputStream;
                 output.Write(buffer, 0, buffer.Length);
+
                 // You must close the output stream.
                 output.Close();
             }
