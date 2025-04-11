@@ -20,9 +20,9 @@ namespace MyApplication
             if (filePath.EndsWith('/'))
                 filePath = filePath + "index.html";
             filePath = filePath.Substring(1);
-            
+
             string basePath = System.AppDomain.CurrentDomain.BaseDirectory;
-            string projectPath = Path.GetFullPath(Path.Combine(basePath, @"..\..\.."));
+            string projectPath = Path.GetFullPath(Path.Combine(basePath, @"..\..\..\app"));
             string pathSource = Path.Combine(projectPath, filePath);
             try
             {
