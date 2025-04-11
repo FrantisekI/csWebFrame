@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("csWebFrame")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+61e87ae54f9a02e298885e57c82075aca73a5431")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5b0f2eebb2d839f525e989db6f2d7384af917945")]
 [assembly: System.Reflection.AssemblyProductAttribute("csWebFrame")]
 [assembly: System.Reflection.AssemblyTitleAttribute("csWebFrame")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
