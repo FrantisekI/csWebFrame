@@ -1,0 +1,11 @@
+co bych měl udělat, aby mi fungoval C# webový framework tak, jak si představuji:
+
+1.	HttpListener ####
+
+3.	Stav - zařídit, abych mohl do html napsat proměnnou a ono to pak bylo před posláním klientovy změněno na hodnotu té proměnné někde v programu
+- když to bude chtít složku, nebo html, tak se podívat do stejné složky, jestli se v ní nenachází .cs soubor se stejným jménem, v něm přečíst proměnnou a tu pak zobrazit
+
+
+2.	Reaktivita - zařídit, aby když uživatel zmáčkne tlačítko, tak aby to server nějak zaregistroval, spustil funkci a vrátil výsledek
+
+4.	

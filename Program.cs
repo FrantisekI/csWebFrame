@@ -2,6 +2,7 @@
 using System.Net;
 using System.Drawing.Imaging;
 using System.Data.SqlTypes;
+using FileToData;
 
 namespace MyApplication
 {
@@ -15,49 +16,7 @@ namespace MyApplication
             SimpleListenerExample(new string[] { "http://localhost:8060/" });
         }
 
-        public static byte[] ReadFile(string filePath)
-        {
-            if (filePath.EndsWith('/'))
-                filePath = filePath + "index.html";
-            filePath = filePath.Substring(1);
-
-            string basePath = System.AppDomain.CurrentDomain.BaseDirectory;
-            string projectPath = Path.GetFullPath(Path.Combine(basePath, @"..\..\..\app"));
-            string pathSource = Path.Combine(projectPath, filePath);
-            try
-            {
-
-                using (FileStream fsSource = new FileStream(pathSource,
-                    FileMode.Open, FileAccess.Read))
-                {
-                    // Read the source file into a byte array.
-                    byte[] bytes = new byte[fsSource.Length];
-                    int numBytesToRead = (int)fsSource.Length;
-                    int numBytesRead = 0;
-                    while (numBytesToRead > 0)
-                    {
-                        // Read may return anything from 0 to numBytesToRead.
-                        int n = fsSource.Read(bytes, numBytesRead, numBytesToRead);
-
-                        // Break when the end of the file is reached.
-                        if (n == 0)
-                            break;
-
-                        numBytesRead += n;
-                        numBytesToRead -= n;
-                    }
-                    numBytesToRead = bytes.Length;
-
-                    return bytes;
-                }
-            }
-            catch (FileNotFoundException ioEx)
-            {
-                Console.WriteLine(ioEx.Message);
-            }
-            return [];
-        }
-
+        
 
         // This example requires the System and System.Net namespaces.
         public static void SimpleListenerExample(string[] prefixes)
@@ -96,7 +55,8 @@ namespace MyApplication
                     Console.WriteLine($"Received request: {request.HttpMethod} {request.Url.AbsolutePath}");
 
                 //byte[] buffer = System.Text.Encoding.UTF8.GetBytes(responseString);
-                byte[] buffer = ReadFile(request.Url.AbsolutePath);
+                FileReader fileReader = new();
+                byte[] buffer = fileReader.ReadFile(request.Url.AbsolutePath);
 
                 // Get a response stream and write the response to it.
                 response.ContentLength64 = buffer.Length;
