@@ -1,10 +1,7 @@
-﻿using System;
-using System.Net;
-using System.Drawing.Imaging;
-using System.Data.SqlTypes;
+﻿using System.Net;
 using FileToData;
 
-namespace MyApplication
+namespace csWebFrame
 {
     class Program
     {
@@ -13,13 +10,13 @@ namespace MyApplication
             Console.WriteLine("Hello, World!");
 
 
-            SimpleListenerExample(new string[] { "http://localhost:8060/" });
+            Listener(new string[] { "http://localhost:8060/" });
         }
 
         
 
         // This example requires the System and System.Net namespaces.
-        public static void SimpleListenerExample(string[] prefixes)
+        public static void Listener(string[] prefixes)
         {
             if (!HttpListener.IsSupported)
             {

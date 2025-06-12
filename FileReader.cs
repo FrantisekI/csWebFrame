@@ -8,21 +8,25 @@ namespace FileToData
 {
     class FileReader
     {
-        string projectPath;
+        string _windowsAppDir = @"..\..\..\app";
+        string _linuxAppDir = "../../../app";
+
+        string _projectPath;
 
         public FileReader()
         {
             string basePath = AppDomain.CurrentDomain.BaseDirectory;
-            projectPath = Path.GetFullPath(Path.Combine(basePath, @"..\..\..\app"));
+            _projectPath = Path.GetFullPath(Path.Combine(basePath, _linuxAppDir));
         }
 
         public byte[] ReadFile(string filePath)
         {
+            Console.WriteLine(filePath);
             if (filePath.EndsWith('/'))
-                filePath = filePath + "index.html";
+                filePath = Path.Combine(filePath, "index.html");
             filePath = filePath.Substring(1);
 
-            string pathSource = Path.Combine(projectPath, filePath);
+            string pathSource = Path.Combine(_projectPath, filePath);
             try
             {
                 using (FileStream fsSource = new FileStream(pathSource,
