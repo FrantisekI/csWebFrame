@@ -8,8 +8,8 @@ namespace FileToData
 {
     class FileReader
     {
-        string _windowsAppDir = @"..\..\..\app";
-        string _linuxAppDir = "../../../app";
+        string _windowsAppDir = @"..\..\..";
+        string _linuxAppDir = "../../..";
 
         string _projectPath;
 
@@ -18,19 +18,31 @@ namespace FileToData
             string basePath = AppDomain.CurrentDomain.BaseDirectory;
             _projectPath = Path.GetFullPath(Path.Combine(basePath, _linuxAppDir));
         }
-
-        public byte[] ReadFile(string filePath)
+        
+        public byte[] GetRequest(string file) //TODO: might need rename
         {
-            Console.WriteLine(filePath);
-            if (filePath.EndsWith('/'))
-                filePath = Path.Combine(filePath, "index.html");
-            filePath = filePath.Substring(1);
+            if (file.EndsWith(".html") || file.EndsWith(".htm") || file.EndsWith("/") || !file.Contains('.'))
+            {
+                //TODO: make sure, that if user request folder, app crashes 
+                if (file.EndsWith("/") || !file.Contains('.'))
+                {
+                    file = Path.Combine(file, "index.html");
+                }
+                return ReadFile("app", file); // TODO: handle site request
+            }
+            else
+            {
+                return ReadFile("src", file);
+            }
+        }
+        
 
-            string pathSource = Path.Combine(_projectPath, filePath);
+        public byte[] ConvertToBytes(string filPath)
+        {
             try
             {
-                using (FileStream fsSource = new FileStream(pathSource,
-                    FileMode.Open, FileAccess.Read))
+                using (FileStream fsSource = new FileStream(filPath,
+                           FileMode.Open, FileAccess.Read))
                 {
                     // Read the source file into a byte array.
                     byte[] bytes = new byte[fsSource.Length];
@@ -62,6 +74,15 @@ namespace FileToData
                 Console.WriteLine(ioEx.Message);
             }
             return []; //TODO: return 404 not found
+        }
+        public byte[] ReadFile(string folder, string filePath)
+        {
+            Console.WriteLine(filePath);
+            filePath = filePath.Substring(1);
+
+            string pathSource = Path.Combine(Path.Combine(_projectPath, folder), filePath);
+            
+            return ConvertToBytes(pathSource);
         }
 
     }

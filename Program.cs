@@ -14,8 +14,6 @@ namespace csWebFrame
         }
 
         
-
-        // This example requires the System and System.Net namespaces.
         public static void Listener(string[] prefixes)
         {
             if (!HttpListener.IsSupported)
@@ -36,6 +34,7 @@ namespace csWebFrame
             }
             listener.Start();
             Console.WriteLine("Listening... on {0}", prefixes);
+            FileReader fileReader = new();
             while (listener.IsListening)
             {
                 // Note: The GetContext method blocks while waiting for a request.
@@ -51,9 +50,16 @@ namespace csWebFrame
                 else
                     Console.WriteLine($"Received request: {request.HttpMethod} {request.Url.AbsolutePath}");
 
-                //byte[] buffer = System.Text.Encoding.UTF8.GetBytes(responseString);
-                FileReader fileReader = new();
-                byte[] buffer = fileReader.ReadFile(request.Url.AbsolutePath);
+                byte[] buffer;
+                if (request.HttpMethod == "GET")
+                {
+                    buffer = fileReader.GetRequest(request.Url.AbsolutePath);
+                }
+                else
+                {
+                    buffer = []; //TODO: handle POST request
+                }
+                    
 
                 // Get a response stream and write the response to it.
                 response.ContentLength64 = buffer.Length;
