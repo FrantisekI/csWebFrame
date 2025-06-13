@@ -11,5 +11,6 @@ když requestne něco končící /, tak pustí ten .cs v té složce možnosti:
 
 
 2.	Reaktivita - zařídit, aby když uživatel zmáčkne tlačítko, tak aby to server nějak zaregistroval, spustil funkci a vrátil výsledek
+    - zaridit, aby si ty obekty co napise vyvojar pamatovali svuj stav
 
 4.	

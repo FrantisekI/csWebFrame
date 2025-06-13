@@ -3,6 +3,10 @@ using FileToData;
 
 namespace csWebFrame
 {
+    public static class AppConstants
+    {
+        public static readonly string RootDirectory = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", ".."));
+    }
     class Program
     {
         static void Main(string[] args)

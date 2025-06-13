@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using csWebFrame;
 
 namespace FileToData
 {
@@ -12,23 +13,26 @@ namespace FileToData
         string _linuxAppDir = "../../..";
 
         string _projectPath;
+        SitesHolder _sitesHolder = new SitesHolder();
 
         public FileReader()
         {
             string basePath = AppDomain.CurrentDomain.BaseDirectory;
-            _projectPath = Path.GetFullPath(Path.Combine(basePath, _linuxAppDir));
+            _projectPath = Path.GetFullPath(Path.Combine(basePath, _linuxAppDir)); // TODO replace with Appconstants.RootDir
         }
         
         public byte[] GetRequest(string file) //TODO: might need rename
         {
-            if (file.EndsWith(".html") || file.EndsWith(".htm") || file.EndsWith("/") || !file.Contains('.'))
+            if (file.EndsWith(".html") || file.EndsWith("/") || !file.Contains('.'))
             {
                 //TODO: make sure, that if user request folder, app crashes 
                 if (file.EndsWith("/") || !file.Contains('.'))
                 {
                     file = Path.Combine(file, "index.html");
                 }
-                return ReadFile("app", file); // TODO: handle site request
+                
+                return Encoding.UTF8.GetBytes(_sitesHolder.RenderPage(file));
+
             }
             else
             {
