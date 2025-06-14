@@ -6,6 +6,7 @@ namespace csWebFrame
     public static class AppConstants
     {
         public static readonly string RootDirectory = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", ".."));
+        public static readonly string AppDir = Path.Combine(RootDirectory, "app");
     }
     class Program
     {
