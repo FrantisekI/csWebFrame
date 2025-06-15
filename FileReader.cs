@@ -26,10 +26,10 @@ namespace FileToData
             if (file.EndsWith(".html") || file.EndsWith("/") || !file.Contains('.'))
             {
                 //TODO: make sure, that if user request folder, app crashes 
-                if (file.EndsWith("/") || !file.Contains('.'))
-                {
-                    file = Path.Combine(file, "index.html");
-                }
+                // if (file.EndsWith("/") || !file.Contains('.'))
+                // {
+                //     file = Path.Combine(file, "index.html");
+                // }
                 
                 return Encoding.UTF8.GetBytes(_sitesHolder.RenderPage(file));
 
