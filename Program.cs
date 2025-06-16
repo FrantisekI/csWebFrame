@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using FileToData;
 
 namespace csWebFrame
 {
@@ -12,13 +11,13 @@ namespace csWebFrame
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello, World!");
-
-
+            
             Listener(new string[] { "http://localhost:8060/" });
         }
 
-        
+        /**<summary>
+         * Posloucha requesty od uzivatele stranky a vsechny GET requsty posle do objektu FileReader
+         * </summary>*/
         public static void Listener(string[] prefixes)
         {
             if (!HttpListener.IsSupported)

@@ -1,24 +1,30 @@
-using System.Net.Mime;
-using FileToData;
 using System.Reflection;
-using System.Reflection.Emit;
 
 
 namespace csWebFrame;
-
+/**<summary>
+ * Drzi stromovou strukturu stranek aplikace, kdyz dostane GET request, tak skombinuje stranky v html
+ * s tim co vrati napsane prislusne funkce v .cs
+ * </summary>*/
 public class SitesHolder
 {
-    SiteNode rootNode;
+    private SiteNode _rootNode;
 
     public SitesHolder() // TODO: make it precompile for production
     {
-        rootNode = CreateTree(AppConstants.AppDir);
+        _rootNode = CreateTree(AppConstants.AppDir);
     }
     
-    private SiteNode CreateTree(string path) 
+    /**<summary>
+     * Vytvari stromvou strukturu adresaru
+     *
+     * vrati SiteNode se strankou korespondujici ke zdejsimu layout.html/cs a jako potomky ma
+     * podadresare slozky
+     * </summary>*/
+    private SiteNode CreateTree(string path)
     {
         Dictionary<string, SiteNode> successors = new Dictionary<string, SiteNode>();
-        //Console.WriteLine(path);
+        
         foreach (string folder in Directory.GetDirectories(path))
         {
             successors.Add(Path.GetFileNameWithoutExtension(Path.GetFileName(folder)),
@@ -36,44 +42,55 @@ public class SitesHolder
             Path.Combine(path, "layout.html") : null;
         
         SiteNode node = new SiteNode(pathToHtml, successors);
-        CreateSiteObject(ref node, Path.Combine(path, "layout.cs"));
-        Console.WriteLine("created {0}, {1}", path, pathToHtml);
+        CreateSiteObject(ref node);
         return node;
     }
-
+    /**<summary>
+     * Podobne, jako CreateTree, ale pouziva se na soubory, ne slozky nema tedy zadne potomky
+     * </summary>*/
     private SiteNode CreateLeaf(string path)
     {
         SiteNode node = new SiteNode(path, null);
-        CreateSiteObject(ref node, path);
+        CreateSiteObject(ref node);
         Console.WriteLine("created {0}", path);
         return node;
     }
-
-    private void CreateSiteObject(ref SiteNode node, string filePath) /// dostane cestu, ktera se muze jmenovat index.html
+    
+    /**<summary>
+     * na vstupu dostane 
+     * Popravde si uplne nejsem jisty, jak funguje
+     * </summary>*/
+    private void CreateSiteObject(ref SiteNode node) /// dostane cestu, ktera se muze jmenovat index.html
     {
-        // Console.WriteLine("Creating site object for: {0}", filePath);
+        if (node.Path == null) return;
+        string filePath = node.Path;
         string relativePath = filePath.Remove(0, AppConstants.AppDir.Length + 1); // +1 to remove the leading slash
-        string namespacePath = "csWebFrame.app." + Path.GetDirectoryName(relativePath).Replace("/", ".").Replace("\\", ".");
+        string namespacePath = "csWebFrame.app." + Path.GetDirectoryName(relativePath)!.Replace("/", ".").Replace("\\", ".");
         string className = Path.GetFileNameWithoutExtension(filePath);
-        
+        string pascalCaseClassName = className.Substring(0, 1).ToUpper() + className.Substring(1);
         if (namespacePath == "csWebFrame.app.")
         {
             namespacePath = "csWebFrame.app";
         }
     
         string fullTypeName = $"{namespacePath}.{className}";
-        Console.WriteLine(fullTypeName);
 
         var type = Assembly.GetExecutingAssembly().GetType(fullTypeName);
+        if (type == null)
+        {
+            // Try with PascalCase class name if normal doesn't exist
+            string pascalCaseFullTypeName = $"{namespacePath}.{pascalCaseClassName}";
+            type = Assembly.GetExecutingAssembly().GetType(pascalCaseFullTypeName);
+        }
+
         if (type != null && typeof(DefaultPage).IsAssignableFrom(type))
         {
-            node.page = (DefaultPage)Activator.CreateInstance(type);
-            Console.WriteLine("Created class {0}", type.Name);
+            node.Page = (DefaultPage)Activator.CreateInstance(type)!;
         }
         else if (type == null)
         {
             // Optional: Log that no matching class was found, but don't throw
-            Console.WriteLine($"No class found for {fullTypeName}");
+            Console.WriteLine($"No class found for {fullTypeName} or {namespacePath}.{pascalCaseClassName}");
         }
         else
         {
@@ -81,39 +98,51 @@ public class SitesHolder
         }
 
     }
-
-    public string RenderNode(SiteNode node)
+    
+    /**<summary>
+     * Vrati stranku jako string - nacte html a v nem nahradi {{var}} promennymi co vygeneruje
+     * prislusny obekt
+     * </summary>*/
+    private string RenderNode(SiteNode node)
     {
-        if (node.path == null) return "";
+        if (node.Path == null) return "";
         
-        string pageContent = File.ReadAllText(node.path);
-        if (node.page != null)
+        string pageContent = File.ReadAllText(node.Path);
+        if (node.Page != null)
         {
-            Console.WriteLine("page is not null");
-            Dictionary<string, object> variables = node.page.Render();
+            Dictionary<string, object> variables = node.Page.Render();
             foreach (string key in variables.Keys)
             {
-                Console.WriteLine(key);
                 pageContent = pageContent.Replace($"{{{{{key}}}}}", variables[key].ToString()); 
                 // double braces marge to form one ^^
             }
         }
         return pageContent;
     }
-
-    public void RenderNode(SiteNode node, ref string child)
+    
+    /**<summary>
+     * Pro slozky ktere mohou obsahovat layout.
+     * Zmeni layout obsahujici child, pokud layout neexistuje, nic se nezmeni 
+     * </summary>*/
+    private void RenderNode(SiteNode node, ref string child)
     {
-        if (node.path == null) return;
+        if (node.Path == null) return;
         string parent = RenderNode(node);
         if (!parent.Contains("{{child}}"))
         {
-            child = $"Layout page {node.path} does not contain {{child}}";
+            child = $"Layout page {node.Path} does not contain {{child}}";
             return;
         }
         child = parent.Replace("{{child}}", child);
         
     }
     
+    /**<summary>
+     * Podiva se, jestli chtena stranka je definovana, pokud ne vrati stranku 404
+     * jinak nacte koncovou stranku a postupne pridava layouty z otcovskych adresaru
+     * 
+     * stranku vrati jako string
+     * </summary>*/
     public string RenderPage(string url)
     {
         /// Dojde ke slozce, kterou chce uzivatel otevrit a overi si, jestli existuje
@@ -122,110 +151,72 @@ public class SitesHolder
         url = url.TrimEnd('/');
         
         string[] folders = url.Split('/', StringSplitOptions.RemoveEmptyEntries);
-        SiteNode currentNode = rootNode;
+        SiteNode? currentNode = _rootNode;
         
-        bool fileIsThere = true;
+        //bool fileIsThere = true;
         foreach (string folder in folders)
         {
-            Console.WriteLine("folder {0}", folder);
-            Console.WriteLine(folder);
             currentNode = currentNode.GoToNext(folder);
             if (currentNode == null)
             {
-                fileIsThere = false;
+                //fileIsThere = false;
                 break;
             }
         }
-        // handle if it is folder
-        if (fileIsThere)
+        // handle if it is a folder
+        if (currentNode != null)
         {
-            if (currentNode._next != null)
+            if (currentNode.Next != null)
             {
-                if (currentNode._next.ContainsKey("index"))
+                if (currentNode.Next.ContainsKey("index"))
                 {
-                    currentNode = currentNode._next["index"];
+                    currentNode = currentNode.Next["index"];
                 }
-                else
-                {
-                    fileIsThere = false;
-                }
+                
             }
             
         }
-        Console.WriteLine("is there: " + url + " " + fileIsThere);
+        Console.WriteLine($"is there: {url} {currentNode != null}");
         /// Nejprve zavola funkce v app slozce, pak nacte strukturu stranky z .html
         /// a vymeni veci uvnitr {{...}} za hodnoty promennych
-        if (fileIsThere)
+        if (currentNode != null)
         {
             string pageContent = RenderNode(currentNode);
-            // string pageContent = File.ReadAllText(
-            //     Path.Combine(AppConstants.AppDir, 
-            //         (Path.Combine(folders) + ".html")));  // TODO: handle if class is not defined
-            // if (currentNode.page != null)
-            // {
-            //     Console.WriteLine("page is not null");
-            //     Dictionary<string, object> variables = currentNode.page.Render();
-            //     foreach (string key in variables.Keys)
-            //     {
-            //         Console.WriteLine(key);
-            //         pageContent = pageContent.Replace($"{{{{{key}}}}}", variables[key].ToString()); 
-            //         // double braces marge to form one ^^
-            //     }
-            // }
+            
             for (int i = folders.Length - 1; i >= 0 ; i--)
             {
-                currentNode = currentNode._previous;
+                currentNode = currentNode.Previous!;
                 RenderNode(currentNode, ref pageContent);
-                // Console.WriteLine(i);
-                // string pathToCurent = Path.Combine(AppConstants.RootDirectory, "app", 
-                //     Path.Combine(folders.Take(i).ToArray()), 
-                //     "layout.html");
-                // // Console.WriteLine("layout.html exists {0}", File.Exists(pathToCurent));
-                // if (File.Exists(pathToCurent))
-                // {
-                //     pageContent = File.ReadAllText(pathToCurent).Replace("{{child}}", pageContent);
-                // }
-                //
-                //
-                // if (currentNode != null && currentNode.page != null)
-                // {
-                //     Console.WriteLine("is not null");
-                //     Dictionary<string, object> variables = currentNode._next["layout"].page.Render();
-                //     foreach (string key in variables.Keys)
-                //     {
-                //         pageContent = pageContent.Replace($"{{{{{key}}}}}", variables[key].ToString()); 
-                //     }
-                // }
-                // TODO: if .cs file exist, than run it, there is a problem that how to  
-                //  destinguish between index.html/cs and layout.html/cs in the tree structure
             }
             return pageContent;
         }
-        return File.ReadAllText(Path.Combine(AppConstants.RootDirectory, "app", "404.html"));
+        
+        SiteNode? notFoundNode = _rootNode.GoToNext("404");
+        return notFoundNode != null ? RenderNode(notFoundNode) : "404 Page Not Found";
     }
 }
 
 public class SiteNode
 {
-    public DefaultPage? page; //TODO take care of visibility
-    public Dictionary<string, SiteNode>? _next;
-    public SiteNode? _previous;
-    public string? path;
-    // TODO: refactor to also hold the path to .html file
+    public DefaultPage? Page; //TODO take care of visibility
+    public readonly Dictionary<string, SiteNode>? Next;
+    public SiteNode? Previous;
+    public readonly string? Path;
 
     public SiteNode(string? path, Dictionary<string, SiteNode>? successors)
     {
-        this.path = path;
-        _next = successors;
-        if (_next != null) foreach (SiteNode node in _next.Values)
+        this.Path = path;
+        Next = successors;
+        if (Next != null) foreach (SiteNode node in Next.Values)
         {
-            node._previous = this;
+            node.Previous = this;
         }
     }
 
     public SiteNode? GoToNext(string name)
     {
-        return _next.GetValueOrDefault(name);
+        if (Next != null) return Next.GetValueOrDefault(name);
+        return null;
     }
     
     

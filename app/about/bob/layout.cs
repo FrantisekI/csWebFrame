@@ -1,6 +1,6 @@
 namespace csWebFrame.app.about.bob;
 
-public class layout : DefaultPage
+public class Layout : DefaultPage
 {
     public override Dictionary<string, object> Render()
     {

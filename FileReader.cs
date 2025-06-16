@@ -1,93 +1,80 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using csWebFrame;
+﻿using System.Text;
 
-namespace FileToData
+namespace csWebFrame;
+
+/**<summary>
+ * Volano z Http Listeneru, kduyz uzivatel dela GET request, tak pokud chce zdroj - jako je obrazek nebo ikona
+ * tak se rovnou nacte ze src/ slozky a vrati jeho data v UTF8
+ *
+ * Pokud chce uzivatel stranku, tak zavola funci v SiteHolderu a opet vrati v UTF8 jeji obsah
+ * </summary>*/
+class FileReader
 {
-    class FileReader
+    SitesHolder _sitesHolder = new SitesHolder();
+    
+    public byte[] GetRequest(string file) //TODO: might need rename
     {
-        string _windowsAppDir = @"..\..\..";
-        string _linuxAppDir = "../../..";
-
-        string _projectPath;
-        SitesHolder _sitesHolder = new SitesHolder();
-
-        public FileReader()
+        if (file.EndsWith(".html") || file.EndsWith("/") || !file.Contains('.'))
         {
-            string basePath = AppDomain.CurrentDomain.BaseDirectory;
-            _projectPath = Path.GetFullPath(Path.Combine(basePath, _linuxAppDir)); // TODO replace with Appconstants.RootDir
+            return Encoding.UTF8.GetBytes(_sitesHolder.RenderPage(file));
         }
-        
-        public byte[] GetRequest(string file) //TODO: might need rename
+        else
         {
-            if (file.EndsWith(".html") || file.EndsWith("/") || !file.Contains('.'))
-            {
-                //TODO: make sure, that if user request folder, app crashes 
-                // if (file.EndsWith("/") || !file.Contains('.'))
-                // {
-                //     file = Path.Combine(file, "index.html");
-                // }
-                
-                return Encoding.UTF8.GetBytes(_sitesHolder.RenderPage(file));
-
-            }
-            else
-            {
-                return ReadFile("src", file);
-            }
+            return ReadFile("src", file);
         }
-        
-
-        public byte[] ConvertToBytes(string filPath)
-        {
-            try
-            {
-                using (FileStream fsSource = new FileStream(filPath,
-                           FileMode.Open, FileAccess.Read))
-                {
-                    // Read the source file into a byte array.
-                    byte[] bytes = new byte[fsSource.Length];
-                    int numBytesToRead = (int)fsSource.Length;
-                    int numBytesRead = 0;
-                    while (numBytesToRead > 0)
-                    {
-                        // Read may return anything from 0 to numBytesToRead.
-                        int n = fsSource.Read(bytes, numBytesRead, numBytesToRead);
-
-                        // Break when the end of the file is reached.
-                        if (n == 0)
-                            break;
-
-                        numBytesRead += n;
-                        numBytesToRead -= n;
-                    }
-                    numBytesToRead = bytes.Length;
-
-                    return bytes;
-                }
-            }
-            catch (FileNotFoundException ioEx)
-            {
-                Console.WriteLine(ioEx.Message);
-            }
-            catch(DirectoryNotFoundException ioEx)
-            {
-                Console.WriteLine(ioEx.Message);
-            }
-            return []; //TODO: return 404 not found
-        }
-        public byte[] ReadFile(string folder, string filePath)
-        {
-            Console.WriteLine(filePath);
-            filePath = filePath.Substring(1);
-
-            string pathSource = Path.Combine(Path.Combine(_projectPath, folder), filePath);
-            
-            return ConvertToBytes(pathSource);
-        }
-
     }
+
+    /**<summary>
+     * Na vstupu dostane jaky soubor precist a vrati jeho UTF8 data
+     * </summary>*/
+    private byte[] ConvertToBytes(string filPath)
+    {
+        try
+        {
+            using FileStream fsSource = new FileStream(filPath,
+                FileMode.Open, FileAccess.Read);
+            
+            // Read the source file into a byte array.
+            byte[] bytes = new byte[fsSource.Length];
+            int numBytesToRead = (int)fsSource.Length;
+            int numBytesRead = 0;
+            while (numBytesToRead > 0)
+            {
+                // Read may return anything from 0 to numBytesToRead.
+                int n = fsSource.Read(bytes, numBytesRead, numBytesToRead);
+
+                // Break when the end of the file is reached.
+                if (n == 0)
+                    break;
+
+                numBytesRead += n;
+                numBytesToRead -= n;
+            }
+            //numBytesToRead = bytes.Length;
+
+            return bytes;
+        }
+        catch (FileNotFoundException ioEx)
+        {
+            Console.WriteLine(ioEx.Message);
+        }
+        catch(DirectoryNotFoundException ioEx)
+        {
+            Console.WriteLine(ioEx.Message);
+        }
+        return []; //TODO: return 404 not found
+    }
+    /**<summary>
+     * Dostane relativni cestu k souboru a vrati jeho UTF8 data
+     * </summary>*/
+    private byte[] ReadFile(string folder, string filePath)
+    {
+        Console.WriteLine(filePath);
+        filePath = filePath.Substring(1);
+
+        string pathSource = Path.Combine(Path.Combine(AppConstants.RootDirectory, folder), filePath);
+        
+        return ConvertToBytes(pathSource);
+    }
+
 }
