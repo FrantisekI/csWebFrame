@@ -227,7 +227,8 @@ public class SiteNode
 /**<summary>
  * Template, jak ma vypadat objekt generujici dynamicka data na stranku
  * </summary> */
-public abstract class DefaultPage
+public abstract class DefaultPage(UserSession session)
 {
+    public UserSession Session = session;
     public abstract Dictionary<string, object> Render();
 }

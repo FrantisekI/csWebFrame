@@ -1,6 +1,6 @@
 namespace csWebFrame.app.about;
 
-public class index : DefaultPage
+public class index(UserSession s) : DefaultPage(s)
 {
     public override Dictionary<string, object> Render()
     {
