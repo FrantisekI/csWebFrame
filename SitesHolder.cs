@@ -195,7 +195,11 @@ public class SitesHolder
         return notFoundNode != null ? RenderNode(notFoundNode) : "404 Page Not Found";
     }
 }
-
+/**<summary>
+ * Reprezentuje uzel stromové struktury stránek aplikace, kde každý uzel může obsahovat
+ * reference na další uzly dle stromové hierarchie, odkaz na nadřazený uzel, cestu k souboru
+ * a dynamicky vygenerovanou stránku.
+ * </summary>*/
 public class SiteNode
 {
     public DefaultPage? Page; //TODO take care of visibility
@@ -218,27 +222,12 @@ public class SiteNode
         if (Next != null) return Next.GetValueOrDefault(name);
         return null;
     }
-    
-    
 }
 
+/**<summary>
+ * Template, jak ma vypadat objekt generujici dynamicka data na stranku
+ * </summary> */
 public abstract class DefaultPage
 {
     public abstract Dictionary<string, object> Render();
-
-    /*public string RenderPage(string htmlPath)
-    {
-        string htmlContent = File.ReadAllText(htmlPath);
-        Dictionary<string, object> variables = Render();
-        foreach (string key in variables.Keys)
-        {
-            htmlContent.Replace($"{{{key}}}", variables[key].ToString());
-        }
-        return htmlContent;
-    }
-
-    public string RenderPage(string htmlPath, string child)
-    {
-        return RenderPage(htmlPath).Replace("{{child}}", child);
-    }*/
 }
