@@ -12,15 +12,26 @@ class FileReader
 {
     SitesHolder _sitesHolder = new SitesHolder();
     
-    public byte[] GetRequest(string file) //TODO: might need rename
+    public (int, byte[]) GetRequest(string file) //TODO: might need rename
     {
+        //TODO implement getting css
         if (file.EndsWith(".html") || file.EndsWith("/") || !file.Contains('.'))
         {
-            return Encoding.UTF8.GetBytes(_sitesHolder.RenderPage(file));
+            string? page = _sitesHolder.RenderPage(file);
+            int statusCode = 200;
+            if (page == null)
+            {
+                statusCode = 404;
+                page = _sitesHolder.RenderPage("404");
+            }
+
+            return (statusCode, Encoding.UTF8.GetBytes(page));
+
         }
         else
         {
-            return ReadFile("src", file);
+            byte[] fileData = ReadFile("src", file);
+            return ((fileData == Array.Empty<byte>() ? 404 : 200), fileData);
         }
     }
 

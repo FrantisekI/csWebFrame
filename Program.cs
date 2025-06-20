@@ -1,4 +1,6 @@
-﻿using System.Net;
+﻿using System.Collections.Specialized;
+using System.Net;
+using System.Web;
 
 namespace csWebFrame
 {
@@ -11,7 +13,6 @@ namespace csWebFrame
     {
         static void Main(string[] args)
         {
-            
             Listener(new string[] { "http://localhost:8060/" });
         }
 
@@ -39,7 +40,7 @@ namespace csWebFrame
             listener.Start();
             Console.WriteLine("Listening... on {0}", prefixes);
             FileReader fileReader = new();
-            while (listener.IsListening)
+            while (listener.IsListening) //TODO implement Multithreding
             {
                 // Note: The GetContext method blocks while waiting for a request.
                 HttpListenerContext context = listener.GetContext();
@@ -53,22 +54,52 @@ namespace csWebFrame
                 }
                 else
                     Console.WriteLine($"Received request: {request.HttpMethod} {request.Url.AbsolutePath}");
-
+                
+                System.IO.Stream output = response.OutputStream;
+                int statusCode;
                 byte[] buffer;
                 if (request.HttpMethod == "GET")
                 {
-                    buffer = fileReader.GetRequest(request.Url.AbsolutePath);
+                    
+                    
+                    (statusCode, buffer) = fileReader.GetRequest(request.Url.AbsolutePath);
+                    
+                    response.ContentLength64 = buffer.Length;
+                    output.Write(buffer, 0, buffer.Length);
+                }
+                else if (request.HttpMethod == "POST")
+                {
+                    StreamReader reader = new StreamReader(request.InputStream, request.ContentEncoding);
+                    string formData = reader.ReadToEnd();
+                    Console.WriteLine(formData);
+                    reader.Close();
+                    statusCode = 303;
+                    
+                    var parsedFormData = new Dictionary<string, string>();
+                    var pairs = formData.Split('&');
+                    foreach (var pair in pairs)
+                    {
+                        var parts = pair.Split('=');
+                        if (parts.Length == 2)
+                        {
+                            // URL-decode the key and the value
+                            var key = HttpUtility.UrlDecode(parts[0]);
+                            var value = HttpUtility.UrlDecode(parts[1]);
+                            parsedFormData[key] = value;
+                        }
+                    }
+                    Console.WriteLine(request.Url.AbsolutePath);
+                    response.Redirect(request.Url.AbsolutePath);
                 }
                 else
                 {
+                    statusCode = 405;
                     buffer = []; //TODO: handle POST request
                 }
-                    
+                response.StatusCode = statusCode;
 
                 // Get a response stream and write the response to it.
-                response.ContentLength64 = buffer.Length;
-                System.IO.Stream output = response.OutputStream;
-                output.Write(buffer, 0, buffer.Length);
+                
 
                 // You must close the output stream.
                 output.Close();

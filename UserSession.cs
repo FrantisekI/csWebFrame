@@ -24,7 +24,7 @@ public class UserSession
     }
 }
 
-public struct SessionVariableBase(object value)
+public class SessionVariableBase(object value)
 {
     public object Var {get; private set;} = value;
 

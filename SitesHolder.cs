@@ -9,9 +9,12 @@ namespace csWebFrame;
 public class SitesHolder
 {
     private SiteNode _rootNode;
+    private UserSession _session; //TODO: make some Sessions holder - to have multiple users (it should be
+    // passed as a argument to Render function
 
     public SitesHolder() // TODO: make it precompile for production
     {
+        _session = new UserSession();
         _rootNode = CreateTree(AppConstants.AppDir);
     }
     
@@ -85,7 +88,7 @@ public class SitesHolder
 
         if (type != null && typeof(DefaultPage).IsAssignableFrom(type))
         {
-            node.Page = (DefaultPage)Activator.CreateInstance(type)!;
+            node.PageType = type;
         }
         else if (type == null)
         {
@@ -108,9 +111,10 @@ public class SitesHolder
         if (node.Path == null) return "";
         
         string pageContent = File.ReadAllText(node.Path);
-        if (node.Page != null)
+        if (node.PageType != null)
         {
-            Dictionary<string, object> variables = node.Page.Render();
+            DefaultPage pageClassObject = (DefaultPage)Activator.CreateInstance(node.PageType, _session)!;
+            Dictionary<string, object> variables = pageClassObject.Render();
             foreach (string key in variables.Keys)
             {
                 pageContent = pageContent.Replace($"{{{{{key}}}}}", variables[key].ToString()); 
@@ -143,7 +147,7 @@ public class SitesHolder
      * 
      * stranku vrati jako string
      * </summary>*/
-    public string RenderPage(string url)
+    public string? RenderPage(string url)
     {
         /// Dojde ke slozce, kterou chce uzivatel otevrit a overi si, jestli existuje
         int lastDot = url.LastIndexOf('.');
@@ -176,7 +180,8 @@ public class SitesHolder
             }
             
         }
-        Console.WriteLine($"is there: {url} {currentNode != null}");
+        // Console.WriteLine($"is there: {url} {currentNode != null}");
+        
         /// Nejprve zavola funkce v app slozce, pak nacte strukturu stranky z .html
         /// a vymeni veci uvnitr {{...}} za hodnoty promennych
         if (currentNode != null)
@@ -194,41 +199,4 @@ public class SitesHolder
         SiteNode? notFoundNode = _rootNode.GoToNext("404");
         return notFoundNode != null ? RenderNode(notFoundNode) : "404 Page Not Found";
     }
-}
-/**<summary>
- * Reprezentuje uzel stromové struktury stránek aplikace, kde každý uzel může obsahovat
- * reference na další uzly dle stromové hierarchie, odkaz na nadřazený uzel, cestu k souboru
- * a dynamicky vygenerovanou stránku.
- * </summary>*/
-public class SiteNode
-{
-    public DefaultPage? Page; //TODO take care of visibility
-    public readonly Dictionary<string, SiteNode>? Next;
-    public SiteNode? Previous;
-    public readonly string? Path;
-
-    public SiteNode(string? path, Dictionary<string, SiteNode>? successors)
-    {
-        this.Path = path;
-        Next = successors;
-        if (Next != null) foreach (SiteNode node in Next.Values)
-        {
-            node.Previous = this;
-        }
-    }
-
-    public SiteNode? GoToNext(string name)
-    {
-        if (Next != null) return Next.GetValueOrDefault(name);
-        return null;
-    }
-}
-
-/**<summary>
- * Template, jak ma vypadat objekt generujici dynamicka data na stranku
- * </summary> */
-public abstract class DefaultPage(UserSession session)
-{
-    public UserSession Session = session;
-    public abstract Dictionary<string, object> Render();
 }

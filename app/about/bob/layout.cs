@@ -13,8 +13,9 @@ public class Layout(UserSession s) : DefaultPage(s)
     public override Dictionary<string, object> Render()
     {
         Counter counter  = new Counter(Session, 12);
-        
+
         counter.Increment();
+        // counter.Increment();
         return new Dictionary<string, object>
         {
             ["id"] = counter.Get(),
