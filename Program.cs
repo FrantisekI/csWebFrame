@@ -39,7 +39,8 @@ namespace csWebFrame
             }
             listener.Start();
             Console.WriteLine("Listening... on {0}", prefixes);
-            FileReader fileReader = new();
+            SitesHolder sitesHolder = new SitesHolder();
+            FileReader fileReader = new FileReader(sitesHolder);
             while (listener.IsListening) //TODO implement Multithreding
             {
                 // Note: The GetContext method blocks while waiting for a request.
@@ -69,12 +70,28 @@ namespace csWebFrame
                 }
                 else if (request.HttpMethod == "POST")
                 {
+                    /*
+                    // Print detailed information about the POST request
+                    Console.WriteLine("\n===== POST REQUEST DETAILS =====\n");
+                    Console.WriteLine($"Method: {request.HttpMethod}");
+                    Console.WriteLine($"URL: {request.Url}");
+                    Console.WriteLine($"Host: {request.UserHostName}");
+                    Console.WriteLine($"Content Type: {request.ContentType}");
+                    Console.WriteLine($"Content Length: {request.ContentLength64}");
+
+                    // Print all headers
+                    Console.WriteLine("\n--- Headers ---");
+                    foreach (string key in request.Headers.AllKeys)
+                    {
+                        Console.WriteLine($"{key}: {request.Headers[key]}");
+                    }
+                    */
                     StreamReader reader = new StreamReader(request.InputStream, request.ContentEncoding);
                     string formData = reader.ReadToEnd();
                     Console.WriteLine(formData);
                     reader.Close();
                     statusCode = 303;
-                    
+
                     var parsedFormData = new Dictionary<string, string>();
                     var pairs = formData.Split('&');
                     foreach (var pair in pairs)
@@ -88,6 +105,7 @@ namespace csWebFrame
                             parsedFormData[key] = value;
                         }
                     }
+                    sitesHolder.PostRequest(url: request.Url.AbsolutePath, data: parsedFormData);
                     Console.WriteLine(request.Url.AbsolutePath);
                     response.Redirect(request.Url.AbsolutePath);
                 }

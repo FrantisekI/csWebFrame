@@ -45,7 +45,7 @@ public class SitesHolder
             Path.Combine(path, "layout.html") : null;
         
         SiteNode node = new SiteNode(pathToHtml, successors);
-        CreateSiteObject(ref node);
+        CreateSiteExecutable(ref node);
         return node;
     }
     /**<summary>
@@ -54,7 +54,7 @@ public class SitesHolder
     private SiteNode CreateLeaf(string path)
     {
         SiteNode node = new SiteNode(path, null);
-        CreateSiteObject(ref node);
+        CreateSiteExecutable(ref node);
         Console.WriteLine("created {0}", path);
         return node;
     }
@@ -63,7 +63,7 @@ public class SitesHolder
      * na vstupu dostane 
      * Popravde si uplne nejsem jisty, jak funguje
      * </summary>*/
-    private void CreateSiteObject(ref SiteNode node) /// dostane cestu, ktera se muze jmenovat index.html
+    private void CreateSiteExecutable(ref SiteNode node) /// dostane cestu, ktera se muze jmenovat index.html
     {
         if (node.Path == null) return;
         string filePath = node.Path;
@@ -117,11 +117,58 @@ public class SitesHolder
             Dictionary<string, object> variables = pageClassObject.Render();
             foreach (string key in variables.Keys)
             {
-                pageContent = pageContent.Replace($"{{{{{key}}}}}", variables[key].ToString()); 
-                // double braces marge to form one ^^
+                if (typeof(DefaultPage.Button).IsAssignableFrom(variables[key].GetType()))
+                {
+                    Console.WriteLine("we are on page {0} and there is a button", node.Path);
+                }
+                else
+                {
+                    pageContent = pageContent.Replace($"{{{{{key}}}}}", variables[key].ToString());
+                    // double braces marge to form one ^^
+                }
             }
         }
         return pageContent;
+    }
+
+    private string CreateButtonElement(DefaultPage.Button button)
+    {
+        return "<form ?action=\"{buttonIdentifier}\" method=\"POST\" ?class=\"\" ?id=\"\" >" +
+            "<button ?class=\"\" ?id=\"\" ></button></form>";
+    }
+    
+    /**<summary>
+     * handles the buttonClick a vrati redirect cestu,
+     * pokud nenajde stranku, nebo se neco pokazi, vrati null, a meli bychom odpovedet 400
+     */
+    public string? PostRequest(string url, Dictionary<string, string> data)
+    {
+        string[] pathParts = url.Split('&');
+        if (pathParts.Length != 2)
+        {
+            Console.WriteLine("Bad POST request path");
+            return null;
+        }
+        
+        string pathToButton = pathParts[0];
+        SiteNode? buttonContainer = FindNode(pathToButton);
+        string buttonKey = pathParts[1];
+        if (buttonContainer.Path == null) return "";
+        
+        if (buttonContainer.PageType != null)
+        {
+            DefaultPage pageClassObject = (DefaultPage)Activator.CreateInstance(buttonContainer.PageType, _session)!;
+            Dictionary<string, object> variables = pageClassObject.Render();
+            object potentialButton = variables[buttonKey];
+            if (typeof(DefaultPage.Button).IsAssignableFrom(potentialButton.GetType()))
+            {
+                DefaultPage.Button button = (DefaultPage.Button)potentialButton;
+                button.OnClick(data);
+            }
+            
+        }
+        Console.WriteLine("Pressed Button has not been found.");
+        return null;
     }
     
     /**<summary>
@@ -148,6 +195,29 @@ public class SitesHolder
      * stranku vrati jako string
      * </summary>*/
     public string? RenderPage(string url)
+    {
+        
+        SiteNode? currentNode = FindNode(url);
+        
+        /// Nejprve zavola funkce v app slozce, pak nacte strukturu stranky z .html
+        /// a vymeni veci uvnitr {{...}} za hodnoty promennych
+        if (currentNode != null)
+        {
+            string pageContent = RenderNode(currentNode);
+            
+            while (currentNode.Previous != null)
+            {
+                currentNode = currentNode.Previous!;
+                RenderNode(currentNode, ref pageContent);
+            }
+            return pageContent;
+        }
+        
+        SiteNode? notFoundNode = _rootNode.GoToNext("404");
+        return notFoundNode != null ? RenderNode(notFoundNode) : "404 Page Not Found";
+    }
+
+    public SiteNode? FindNode(string url)
     {
         /// Dojde ke slozce, kterou chce uzivatel otevrit a overi si, jestli existuje
         int lastDot = url.LastIndexOf('.');
@@ -180,23 +250,6 @@ public class SitesHolder
             }
             
         }
-        // Console.WriteLine($"is there: {url} {currentNode != null}");
-        
-        /// Nejprve zavola funkce v app slozce, pak nacte strukturu stranky z .html
-        /// a vymeni veci uvnitr {{...}} za hodnoty promennych
-        if (currentNode != null)
-        {
-            string pageContent = RenderNode(currentNode);
-            
-            for (int i = folders.Length - 1; i >= 0 ; i--)
-            {
-                currentNode = currentNode.Previous!;
-                RenderNode(currentNode, ref pageContent);
-            }
-            return pageContent;
-        }
-        
-        SiteNode? notFoundNode = _rootNode.GoToNext("404");
-        return notFoundNode != null ? RenderNode(notFoundNode) : "404 Page Not Found";
+        return currentNode;
     }
 }

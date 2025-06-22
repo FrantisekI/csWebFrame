@@ -55,4 +55,34 @@ public abstract class SessionVar<TVar>
     {
         _session.SetVar(this.GetType(), value);
     }
+    /**
+     * Pori posilani POST requestu od usera dostane funkce post data, ty preda teto funkci
+     * a pokud v datech je promenna a ve spravnem formatu, vrati true a nastavi tuto hodnotu
+     * jinak jen vrati false
+    */
+    public bool SetFromUserData(string key, Dictionary<string, string> userData)
+    {
+        if (!userData.ContainsKey(key))
+        {
+            Console.WriteLine($"No {this.GetType()} in user data");
+            return false;
+        }
+        TVar var;
+        try
+        {
+            var = (TVar)Convert.ChangeType(userData[key], typeof(TVar));
+        }
+        catch
+        {
+            Console.WriteLine($"Variable {this.GetType()} is in invalid format");
+            return false;
+        }
+        Set(var);
+        return true;
+    }
+
+    public bool SetFromUserData(Dictionary<string, string> userData)
+    {
+        return SetFromUserData(this.GetType().Name, userData);
+    }
 }

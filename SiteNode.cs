@@ -37,6 +37,20 @@ public abstract class DefaultPage(UserSession session)
 {
     public UserSession Session = session;
     public abstract Dictionary<string, object> Render();
+    
+    
+    public abstract class Button
+    {
+        public string Name = nameof(Button);
+        public string? Text;
+        public string? Redirect;
+        public string? ButtonClass;
+        public string? ButtonId;
+        public string? FormClass;
+        public string? FormId;
+
+        public abstract void OnClick(Dictionary<string, string> data);
+    }
 }
 // TODO create abstract class for Layouts - so it will be initilized with child
 // and than read variables from it to use them somewhere

@@ -10,7 +10,12 @@ namespace csWebFrame;
  * </summary>*/
 class FileReader
 {
-    SitesHolder _sitesHolder = new SitesHolder();
+    SitesHolder _sitesHolder;
+
+    public FileReader(SitesHolder sitesHolder)
+    {
+        _sitesHolder = sitesHolder;
+    }
     
     public (int, byte[]) GetRequest(string file) //TODO: might need rename
     {
