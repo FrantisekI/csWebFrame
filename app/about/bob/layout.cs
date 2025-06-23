@@ -19,7 +19,9 @@ public class Layout(UserSession s) : DefaultPage(s)
         }
         public override void OnClick(Dictionary<string, string> data)
         {
-            _counter.SetFromUserData(data);
+            _counter.SetFromUserData("id", data);
+            Console.WriteLine("pressed the button");
+            Console.WriteLine(_counter.Get());
         }
     }
     public override Dictionary<string, object> Render()
@@ -30,7 +32,7 @@ public class Layout(UserSession s) : DefaultPage(s)
         // counter.Increment();
         return new Dictionary<string, object>
         {
-            ["id"] = counter.Get(),
+            ["id"] = 55,
             ["counter"] = countUp,
         };
     }

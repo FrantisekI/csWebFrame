@@ -105,9 +105,16 @@ namespace csWebFrame
                             parsedFormData[key] = value;
                         }
                     }
-                    sitesHolder.PostRequest(url: request.Url.AbsolutePath, data: parsedFormData);
+                    string? redirect = sitesHolder.PostRequest(request.Url.AbsolutePath, parsedFormData);
                     Console.WriteLine(request.Url.AbsolutePath);
-                    response.Redirect(request.Url.AbsolutePath);
+                    if (redirect != null)
+                    {
+                        response.Redirect(redirect);
+                    }
+                    else
+                    {
+                        response.Redirect("404");
+                    }
                 }
                 else
                 {

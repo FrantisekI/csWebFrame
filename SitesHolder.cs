@@ -144,26 +144,47 @@ public class SitesHolder
     public string? PostRequest(string url, Dictionary<string, string> data)
     {
         string[] pathParts = url.Split('&');
-        if (pathParts.Length != 2)
+        if (pathParts.Length != 3)
         {
             Console.WriteLine("Bad POST request path");
             return null;
         }
         
+        string strIndex = pathParts[1];
+        int indexFromEnd = int.TryParse(strIndex, out int indexParsed) ? indexParsed : -1;
+        if (indexFromEnd < 0 || indexFromEnd >= pathParts.Length)
+        {
+            Console.WriteLine("Bad index in POST request path");
+            return null;
+        }
+
         string pathToButton = pathParts[0];
+        string buttonKey = pathParts[2];
         SiteNode? buttonContainer = FindNode(pathToButton);
-        string buttonKey = pathParts[1];
+        if (buttonContainer == null)
+        {
+            Console.WriteLine("Request path not found");
+            return null;
+        }
         if (buttonContainer.Path == null) return "";
         
         if (buttonContainer.PageType != null)
         {
+            for (int i = 0; i < indexFromEnd; i++)
+            {
+                buttonContainer = buttonContainer.Previous;
+            }
             DefaultPage pageClassObject = (DefaultPage)Activator.CreateInstance(buttonContainer.PageType, _session)!;
+            Console.WriteLine(pageClassObject.GetType().Name);
             Dictionary<string, object> variables = pageClassObject.Render();
             object potentialButton = variables[buttonKey];
+            
             if (typeof(DefaultPage.Button).IsAssignableFrom(potentialButton.GetType()))
             {
                 DefaultPage.Button button = (DefaultPage.Button)potentialButton;
                 button.OnClick(data);
+                if (button.Redirect == null) return pathToButton;
+                return button.Redirect;
             }
             
         }
