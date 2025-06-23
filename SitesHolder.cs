@@ -133,6 +133,7 @@ public class SitesHolder
 
     private string CreateButtonElement(DefaultPage.Button button)
     {
+        
         return "<form ?action=\"{buttonIdentifier}\" method=\"POST\" ?class=\"\" ?id=\"\" >" +
             "<button ?class=\"\" ?id=\"\" ></button></form>";
     }
@@ -168,22 +169,34 @@ public class SitesHolder
         }
         if (buttonContainer.Path == null) return "";
         
+        for (int i = 0; i < indexFromEnd; i++)
+        {
+            buttonContainer = buttonContainer.Previous;
+        }
         if (buttonContainer.PageType != null)
         {
-            for (int i = 0; i < indexFromEnd; i++)
-            {
-                buttonContainer = buttonContainer.Previous;
-            }
             DefaultPage pageClassObject = (DefaultPage)Activator.CreateInstance(buttonContainer.PageType, _session)!;
-            Console.WriteLine(pageClassObject.GetType().Name);
+            Console.WriteLine("searching in" + pageClassObject.GetType().Name);
             Dictionary<string, object> variables = pageClassObject.Render();
+            if (!variables.ContainsKey(buttonKey))
+            {
+                Console.WriteLine($"Button named {buttonKey} not found");
+                return null;
+            }
             object potentialButton = variables[buttonKey];
             
             if (typeof(DefaultPage.Button).IsAssignableFrom(potentialButton.GetType()))
             {
                 DefaultPage.Button button = (DefaultPage.Button)potentialButton;
                 button.OnClick(data);
-                if (button.Redirect == null) return pathToButton;
+                if (button.Redirect == null)
+                {
+                    if (pathToButton.EndsWith("index"))
+                    {
+                        return pathToButton.Substring(0, pathToButton.Length - "index".Length);
+                    }
+                    return pathToButton;
+                }
                 return button.Redirect;
             }
             
@@ -261,13 +274,9 @@ public class SitesHolder
         // handle if it is a folder
         if (currentNode != null)
         {
-            if (currentNode.Next != null)
+            if (currentNode.Next != null && currentNode.Next.ContainsKey("index"))
             {
-                if (currentNode.Next.ContainsKey("index"))
-                {
-                    currentNode = currentNode.Next["index"];
-                }
-                
+                currentNode = currentNode.Next["index"];
             }
             
         }

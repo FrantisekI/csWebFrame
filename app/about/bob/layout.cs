@@ -19,7 +19,7 @@ public class Layout(UserSession s) : DefaultPage(s)
         }
         public override void OnClick(Dictionary<string, string> data)
         {
-            _counter.SetFromUserData("id", data);
+            _counter.SetFromUserData("number", data);
             Console.WriteLine("pressed the button");
             Console.WriteLine(_counter.Get());
         }

@@ -64,7 +64,7 @@ public abstract class SessionVar<TVar>
     {
         if (!userData.ContainsKey(key))
         {
-            Console.WriteLine($"No {this.GetType()} in user data");
+            Console.WriteLine($"No {key} in user data");
             return false;
         }
         TVar var;
