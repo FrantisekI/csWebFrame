@@ -13,7 +13,7 @@ namespace csWebFrame
     {
         static void Main(string[] args)
         {
-            Listener(new string[] { "http://localhost:8060/" });
+            Listener(new string[] { "http://192.168.0.105:8060/" });
         }
 
         /**<summary>
@@ -46,13 +46,22 @@ namespace csWebFrame
             {
                 // Note: The GetContext method blocks while waiting for a request.
                 HttpListenerContext context = listener.GetContext();
+                Task.Run(() => HandleRequest(context, fileReader, sessionManager, sitesHolder));
+                
+            }
+            listener.Stop();
+        }
+        private static void HandleRequest(HttpListenerContext context, FileReader fileReader, 
+            SessionManager sessionManager, SitesHolder sitesHolder)
+        {
+            try
+            {
                 HttpListenerRequest request = context.Request;
-                // Obtain a response object.
                 HttpListenerResponse response = context.Response;
                 if (request.Url == null)
                 {
                     Console.WriteLine("Request URL is null.");
-                    continue;
+                    return;
                 }
                 else
                     Console.WriteLine($"Received request: {request.HttpMethod} {request.Url.AbsolutePath}");
@@ -130,8 +139,18 @@ namespace csWebFrame
 
                 // You must close the output stream.
                 output.Close();
+                
             }
-            listener.Stop();
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error handling request: {ex.Message}");
+                try
+                {
+                    context.Response.StatusCode = 500;
+                    context.Response.OutputStream.Close();
+                }
+                catch { /* Ignore cleanup errors */ }
+            }
         }
     }
 }

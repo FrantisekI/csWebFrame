@@ -225,8 +225,7 @@ public class SitesHolder
                 string value;
                 if (typeof(DefaultPage.Button).IsAssignableFrom(variables[key].GetType()))
                 {
-                    Console.WriteLine("we are on page {0} and there is a button", node.Path);
-                    value = CreateButtonElement((DefaultPage.Button)variables[key], $"{currentlyOpenedPage}&{indexFromEnd}&{key}"); //TOOD: musi dostat celou relativni cestu k otevrene strance, to kde se prave nachazi
+                    value = CreateButtonElement((DefaultPage.Button)variables[key], $"{currentlyOpenedPage}&{indexFromEnd}&{key}");
                 }
                 else
                 {
