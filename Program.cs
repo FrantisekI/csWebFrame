@@ -119,7 +119,7 @@ namespace csWebFrame
                 else
                 {
                     statusCode = 405;
-                    buffer = []; //TODO: handle POST request
+                    buffer = [];
                 }
                 response.StatusCode = statusCode;
 

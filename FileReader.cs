@@ -78,7 +78,7 @@ class FileReader
         {
             Console.WriteLine(ioEx.Message);
         }
-        return []; //TODO: return 404 not found
+        return [];
     }
     /**<summary>
      * Dostane relativni cestu k souboru a vrati jeho UTF8 data
