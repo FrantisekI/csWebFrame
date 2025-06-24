@@ -22,10 +22,6 @@ public class index(UserSession s) : DefaultPage(s)
                 
         }
 
-        public KeyValuePair<string, Button> Hash(string key)
-        {
-            return new KeyValuePair<string, Button>(key, this);
-        }
     }
     public override Dictionary<string, object> Render()
     {

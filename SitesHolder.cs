@@ -100,28 +100,7 @@ public class SitesHolder
 
     }
 
-    private string CreateButtonElement(DefaultPage.Button button, string action)
-    {
-        string html = $"<form action=\"{action}\" class=\"{button.FormClass}\" id=\"{button.FormId}\" method=\"POST\">\n";
-        bool wasThereSubmitButton = false;
-        if (button.formElements != null) foreach (DefaultPage.Button.InputElementAtrributes element in button.formElements)
-        {
-            html += element.GetHtmlElement();
-            if (element.attribute == DefaultPage.Button.InputElementAtrributes.PossibleAttributes.button &&
-                element.type == "submit")
-            {
-                wasThereSubmitButton = true;
-            }
-        }
 
-        if (!wasThereSubmitButton)
-        {
-            html += $"<button type=\"submit\">{button.Name}</button>\n";
-        }
-        html += "</form>\n";
-        return html;
-        
-    }
 
     /**<summary>
      * handles the buttonClick a vrati redirect cestu,
@@ -170,9 +149,9 @@ public class SitesHolder
             }
             object potentialButton = variables[buttonKey];
             
-            if (typeof(DefaultPage.Button).IsAssignableFrom(potentialButton.GetType()))
+            if (typeof(Button).IsAssignableFrom(potentialButton.GetType()))
             {
-                DefaultPage.Button button = (DefaultPage.Button)potentialButton;
+                Button button = (Button)potentialButton;
                 button.OnClick(data);
                 if (button.Redirect == null)
                 {
@@ -190,54 +169,7 @@ public class SitesHolder
         return null;
     }
 
-    /**<summary>
-     * Pro slozky ktere mohou obsahovat layout.
-     * Zmeni layout obsahujici child, pokud layout neexistuje, nic se nezmeni 
-     * </summary>*/
-    private void RenderNode(SiteNode node, UserSession session, ref string child, int indexFromEnd, string currentlyOpenedPage)
-    {
-        if (node.Path == null) return;
-        string parent = RenderNode(node, session, indexFromEnd, currentlyOpenedPage);
-        if (!parent.Contains("{{child}}"))
-        {
-            child = $"Layout page {node.Path} does not contain {{child}}";
-            return;
-        }
-        child = parent.Replace("{{child}}", child);
-        
-    }
-
-    /**<summary>
-     * Vrati stranku jako string - nacte html a v nem nahradi {{var}} promennymi co vygeneruje
-     * prislusny obekt
-     * </summary>*/
-    private string RenderNode(SiteNode node, UserSession session, int indexFromEnd, string currentlyOpenedPage)
-    {
-        if (node.Path == null) return "";
-        
-        string pageContent = File.ReadAllText(node.Path);
-        if (node.PageType != null)
-        {
-            DefaultPage pageClassObject = (DefaultPage)Activator.CreateInstance(node.PageType, session)!;
-            Dictionary<string, object> variables = pageClassObject.Render();
-            foreach (string key in variables.Keys)
-            {
-                string value;
-                if (typeof(DefaultPage.Button).IsAssignableFrom(variables[key].GetType()))
-                {
-                    value = CreateButtonElement((DefaultPage.Button)variables[key], $"{currentlyOpenedPage}&{indexFromEnd}&{key}");
-                }
-                else
-                {
-                    value = variables[key].ToString();
-                }
-
-                pageContent = pageContent.Replace($"{{{{{key}}}}}", value);
-                // double braces marge to form one ^^
-            }
-        }
-        return pageContent;
-    }
+    
 
     /**<summary>
      * Podiva se, jestli chtena stranka je definovana, pokud ne vrati stranku 404
@@ -254,19 +186,19 @@ public class SitesHolder
         int indexFromEnd = 0;
         if (currentNode != null)
         {
-            string pageContent = RenderNode(currentNode, session, indexFromEnd, pagePath);
+            string pageContent = HtmlCreator.RenderNode(currentNode, session, indexFromEnd, pagePath);
             
             while (currentNode.Previous != null)
             {
                 indexFromEnd++;
                 currentNode = currentNode.Previous!;
-                RenderNode(currentNode, session, ref pageContent, indexFromEnd, pagePath);
+                HtmlCreator.RenderNode(currentNode, session, ref pageContent, indexFromEnd, pagePath);
             }
             return pageContent;
         }
         
         SiteNode? notFoundNode = _rootNode.GoToNext("404");
-        return notFoundNode != null ? RenderNode(notFoundNode, session, 0, "/") : "404 Page Not Found";
+        return notFoundNode != null ? HtmlCreator.RenderNode(notFoundNode, session, 0, "/") : "404 Page Not Found";
     }
 
     public (SiteNode?, string) FindNode(string url)

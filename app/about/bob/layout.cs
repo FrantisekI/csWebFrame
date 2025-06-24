@@ -10,6 +10,19 @@ public class Counter(UserSession s, int val) : SessionVar<int>(s, val)
 
 public class Text(UserSession s, string val) : SessionVar<string>(s, val);
 
+public class WritePoem : Button
+{
+    readonly Text _text;
+    public WritePoem(Text text)
+    {
+        _text = text;
+    }
+    public override void OnClick(Dictionary<string, string> data)
+    {
+        _text.SetFromUserData("poem", data);
+    }
+}
+
 public class Layout(UserSession s) : DefaultPage(s)
 {
     public class CountUp : Button
@@ -27,18 +40,7 @@ public class Layout(UserSession s) : DefaultPage(s)
         }
     }
 
-    public class WritePoem : Button
-    {
-        readonly Text _text;
-        public WritePoem(Text text)
-        {
-            _text = text;
-        }
-        public override void OnClick(Dictionary<string, string> data)
-        {
-            _text.SetFromUserData("poem", data);
-        }
-    }
+    
     public override Dictionary<string, object> Render()
     {
         Counter counter  = new Counter(Session, 12);
