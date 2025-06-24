@@ -31,6 +31,12 @@ public class index(UserSession s) : DefaultPage(s)
     {
         Number num = new Number(Session, 12);
         SetNumber setNumber = new SetNumber(num);
+        setNumber.formElements = new[] {
+            new SetNumber.InputElementAtrributes(Button.InputElementAtrributes.PossibleAttributes.input, "number", "number")
+        };
+        setNumber.Name = "Set Number";
+        setNumber.formElements[0].name = "NUM";
+        setNumber.formElements[0].value = "42";
         return new Dictionary<string, object>
         {
             ["var"] = "Hello World!",
