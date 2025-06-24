@@ -17,17 +17,17 @@ class FileReader
         _sitesHolder = sitesHolder;
     }
     
-    public (int, byte[]) GetRequest(string file) //TODO: might need rename
+    public (int, byte[]) GetRequest(string file, UserSession session) //TODO: might need rename
     {
         //TODO implement getting css
         if (file.EndsWith(".html") || file.EndsWith("/") || !file.Contains('.'))
         {
-            string? page = _sitesHolder.RenderPage(file);
+            string? page = _sitesHolder.RenderPage(file, session);
             int statusCode = 200;
             if (page == null)
             {
                 statusCode = 404;
-                page = _sitesHolder.RenderPage("404");
+                page = _sitesHolder.RenderPage("404", session);
             }
 
             return (statusCode, Encoding.UTF8.GetBytes(page));

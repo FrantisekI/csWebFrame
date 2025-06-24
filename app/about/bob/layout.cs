@@ -45,6 +45,8 @@ public class Layout(UserSession s) : DefaultPage(s)
         Text text = new Text(Session, "Hello World!");
         
         CountUp countUp = new CountUp(counter);
+        countUp.AddFormElement(new Button.InputElementAtrributes(Button.InputElementAtrributes.PossibleAttributes.input, "number", "number"));
+        
         WritePoem textB = new WritePoem(text);
         textB.AddFormElement(new Button.InputElementAtrributes(Button.InputElementAtrributes.PossibleAttributes.input, "text", "poem"));
         textB.Name = "Poem";

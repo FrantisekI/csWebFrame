@@ -41,6 +41,7 @@ namespace csWebFrame
             Console.WriteLine("Listening... on {0}", prefixes);
             SitesHolder sitesHolder = new SitesHolder();
             FileReader fileReader = new FileReader(sitesHolder);
+            SessionManager sessionManager = new SessionManager();
             while (listener.IsListening) //TODO implement Multithreding
             {
                 // Note: The GetContext method blocks while waiting for a request.
@@ -56,14 +57,15 @@ namespace csWebFrame
                 else
                     Console.WriteLine($"Received request: {request.HttpMethod} {request.Url.AbsolutePath}");
                 
-                System.IO.Stream output = response.OutputStream;
+                Stream output = response.OutputStream;
+                UserSession session = sessionManager.GetOrCreateSession(request, response);
                 int statusCode;
                 byte[] buffer;
                 if (request.HttpMethod == "GET")
                 {
                     
                     
-                    (statusCode, buffer) = fileReader.GetRequest(request.Url.AbsolutePath);
+                    (statusCode, buffer) = fileReader.GetRequest(request.Url.AbsolutePath, session);
                     
                     response.ContentLength64 = buffer.Length;
                     output.Write(buffer, 0, buffer.Length);
@@ -105,7 +107,7 @@ namespace csWebFrame
                             parsedFormData[key] = value;
                         }
                     }
-                    string? redirect = sitesHolder.PostRequest(request.Url.AbsolutePath, parsedFormData);
+                    string? redirect = sitesHolder.PostRequest(request.Url.AbsolutePath, parsedFormData, session);
                     Console.WriteLine(request.Url.AbsolutePath);
                     if (redirect != null)
                     {

@@ -9,12 +9,10 @@ namespace csWebFrame;
 public class SitesHolder
 {
     private SiteNode _rootNode;
-    private UserSession _session; //TODO: make some Sessions holder - to have multiple users (it should be
-    // passed as a argument to Render function
+    
 
     public SitesHolder()
     {
-        _session = new UserSession();
         _rootNode = CreateTree(AppConstants.AppDir);
     }
     
@@ -129,7 +127,7 @@ public class SitesHolder
      * handles the buttonClick a vrati redirect cestu,
      * pokud nenajde stranku, nebo se neco pokazi, vrati null, a meli bychom odpovedet 400
      */
-    public string? PostRequest(string url, Dictionary<string, string> data)
+    public string? PostRequest(string url, Dictionary<string, string> data, UserSession session)
     {
         string[] pathParts = url.Split('&');
         if (pathParts.Length != 3)
@@ -162,7 +160,7 @@ public class SitesHolder
         }
         if (buttonContainer.PageType != null)
         {
-            DefaultPage pageClassObject = (DefaultPage)Activator.CreateInstance(buttonContainer.PageType, _session)!;
+            DefaultPage pageClassObject = (DefaultPage)Activator.CreateInstance(buttonContainer.PageType, session)!;
             Console.WriteLine("searching in" + pageClassObject.GetType().Name);
             Dictionary<string, object> variables = pageClassObject.Render();
             if (!variables.ContainsKey(buttonKey))
@@ -196,10 +194,10 @@ public class SitesHolder
      * Pro slozky ktere mohou obsahovat layout.
      * Zmeni layout obsahujici child, pokud layout neexistuje, nic se nezmeni 
      * </summary>*/
-    private void RenderNode(SiteNode node, ref string child, int indexFromEnd, string currentlyOpenedPage)
+    private void RenderNode(SiteNode node, UserSession session, ref string child, int indexFromEnd, string currentlyOpenedPage)
     {
         if (node.Path == null) return;
-        string parent = RenderNode(node, indexFromEnd, currentlyOpenedPage);
+        string parent = RenderNode(node, session, indexFromEnd, currentlyOpenedPage);
         if (!parent.Contains("{{child}}"))
         {
             child = $"Layout page {node.Path} does not contain {{child}}";
@@ -213,14 +211,14 @@ public class SitesHolder
      * Vrati stranku jako string - nacte html a v nem nahradi {{var}} promennymi co vygeneruje
      * prislusny obekt
      * </summary>*/
-    private string RenderNode(SiteNode node, int indexFromEnd, string currentlyOpenedPage)
+    private string RenderNode(SiteNode node, UserSession session, int indexFromEnd, string currentlyOpenedPage)
     {
         if (node.Path == null) return "";
         
         string pageContent = File.ReadAllText(node.Path);
         if (node.PageType != null)
         {
-            DefaultPage pageClassObject = (DefaultPage)Activator.CreateInstance(node.PageType, _session)!;
+            DefaultPage pageClassObject = (DefaultPage)Activator.CreateInstance(node.PageType, session)!;
             Dictionary<string, object> variables = pageClassObject.Render();
             foreach (string key in variables.Keys)
             {
@@ -248,7 +246,7 @@ public class SitesHolder
      * 
      * stranku vrati jako string
      * </summary>*/
-    public string? RenderPage(string url)
+    public string? RenderPage(string url, UserSession session)
     {
         (SiteNode? currentNode, string pagePath) = FindNode(url);
         
@@ -257,19 +255,19 @@ public class SitesHolder
         int indexFromEnd = 0;
         if (currentNode != null)
         {
-            string pageContent = RenderNode(currentNode, indexFromEnd, pagePath);
+            string pageContent = RenderNode(currentNode, session, indexFromEnd, pagePath);
             
             while (currentNode.Previous != null)
             {
                 indexFromEnd++;
                 currentNode = currentNode.Previous!;
-                RenderNode(currentNode, ref pageContent, indexFromEnd, pagePath);
+                RenderNode(currentNode, session, ref pageContent, indexFromEnd, pagePath);
             }
             return pageContent;
         }
         
         SiteNode? notFoundNode = _rootNode.GoToNext("404");
-        return notFoundNode != null ? RenderNode(notFoundNode, 0, "/") : "404 Page Not Found";
+        return notFoundNode != null ? RenderNode(notFoundNode, session, 0, "/") : "404 Page Not Found";
     }
 
     public (SiteNode?, string) FindNode(string url)
