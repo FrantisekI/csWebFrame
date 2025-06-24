@@ -29,7 +29,7 @@ public class HtmlCreator
      * Vrati stranku jako string - nacte html a v nem nahradi {{var}} promennymi co vygeneruje
      * prislusny obekt
      * </summary>*/
-    public static string RenderNode(SiteNode node, UserSession session, int indexFromEnd, string currentlyOpenedPage)
+    public static string RenderNode(SiteNode node, UserSession session, PostUrl postUrl)
     {
         if (node.Path == null) return "";
         
@@ -41,9 +41,11 @@ public class HtmlCreator
             foreach (string key in variables.Keys)
             {
                 string value;
-                if (typeof(Button).IsAssignableFrom(variables[key].GetType()))
+                if (typeof(DefaultHtmlComponent).IsAssignableFrom(variables[key].GetType()))
                 {
-                    value = CreateButtonElement((Button)variables[key], $"{currentlyOpenedPage}&{indexFromEnd}&{key}");
+                    PostUrl newPostUrl = postUrl;
+                    newPostUrl.AddNestedComponent(key);
+                    value = ((DefaultHtmlComponent)variables[key]).GetHtml(session, newPostUrl);
                 }
                 else
                 {
@@ -60,10 +62,10 @@ public class HtmlCreator
      * Pro slozky ktere mohou obsahovat layout.
      * Zmeni layout obsahujici child, pokud layout neexistuje, nic se nezmeni
      * </summary>*/
-    public static void RenderNode(SiteNode node, UserSession session, ref string child, int indexFromEnd, string currentlyOpenedPage)
+    public static void RenderNode(SiteNode node, UserSession session, ref string child, PostUrl postUrl)
     {
         if (node.Path == null) return;
-        string parent = RenderNode(node, session, indexFromEnd, currentlyOpenedPage);
+        string parent = RenderNode(node, session, postUrl);
         if (!parent.Contains("{{child}}"))
         {
             child = $"Layout page {node.Path} does not contain {{child}}";

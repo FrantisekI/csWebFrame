@@ -183,22 +183,22 @@ public class SitesHolder
         
         /// Nejprve zavola funkce v app slozce, pak nacte strukturu stranky z .html
         /// a vymeni veci uvnitr {{...}} za hodnoty promennych
-        int indexFromEnd = 0;
         if (currentNode != null)
         {
-            string pageContent = HtmlCreator.RenderNode(currentNode, session, indexFromEnd, pagePath);
+            PostUrl postUrl = new PostUrl(pagePath, 0);   
+            string pageContent = HtmlCreator.RenderNode(currentNode, session, postUrl);
             
             while (currentNode.Previous != null)
             {
-                indexFromEnd++;
                 currentNode = currentNode.Previous!;
-                HtmlCreator.RenderNode(currentNode, session, ref pageContent, indexFromEnd, pagePath);
+                postUrl.IncrementIndex();
+                HtmlCreator.RenderNode(currentNode, session, ref pageContent, postUrl);
             }
             return pageContent;
         }
         
         SiteNode? notFoundNode = _rootNode.GoToNext("404");
-        return notFoundNode != null ? HtmlCreator.RenderNode(notFoundNode, session, 0, "/") : "404 Page Not Found";
+        return notFoundNode != null ? HtmlCreator.RenderNode(notFoundNode, session, new PostUrl("/", 0)) : "404 Page Not Found";
     }
 
     public (SiteNode?, string) FindNode(string url)

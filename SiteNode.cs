@@ -16,7 +16,7 @@ public abstract class DynamicHtmlComponent()
  * reference na další uzly dle stromové hierarchie, odkaz na nadřazený uzel, cestu k souboru
  * a dynamicky vygenerovanou stránku.
  * </summary>*/
-public class SiteNode
+public class SiteNode : DefaultHtmlComponent
 {
     //TODO take care of visibility
     public Type? PageType; // type should be inherit from DefaultSite
@@ -39,6 +39,18 @@ public class SiteNode
         if (Next != null) return Next.GetValueOrDefault(name);
         return null;
     }
+
+    public override Dictionary<string, object> GetVariables(UserSession session)
+    {
+        if (PageType == null) return new Dictionary<string, object>();
+        DefaultPage pageClassObject = (DefaultPage)Activator.CreateInstance(PageType, session)!;
+        return pageClassObject.Render();
+    }
+    public override string GetHtml(UserSession session, PostUrl postUrl)
+    {
+        postUrl.NewComponent("");
+        return HtmlCreator.RenderNode(this, session, postUrl);
+    }
 }
 
 /**<summary>
@@ -50,16 +62,12 @@ public abstract class DefaultPage(UserSession session)
     public abstract Dictionary<string, object> Render();
 }
 
-public abstract class Button
+public abstract class Button : DefaultHtmlComponent
 {
     public string Name = nameof(Button);
-
     public InputElementAtrributes[]? formElements;
-
     public string? Redirect;
-
     public string? FormClass;
-
     public string? FormId;
 
     public class InputElementAtrributes
@@ -138,6 +146,15 @@ public abstract class Button
         if (formElements == null) formElements = new InputElementAtrributes[1];
         else Array.Resize(ref formElements, formElements.Length + 1);
         formElements[formElements.Length - 1] = element;
+    }
+
+    public override string GetHtml(UserSession session, PostUrl postUrl)
+    {
+        return HtmlCreator.CreateButtonElement(this, postUrl.GetUrl());
+    }
+    public override Dictionary<string, object> GetVariables(UserSession session)
+    {
+        return new Dictionary<string, object>();
     }
     public abstract void OnClick(Dictionary<string, string> data);
 }
