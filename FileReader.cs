@@ -12,14 +12,24 @@ class FileReader
 {
     SitesHolder _sitesHolder;
 
+    /**<summary>
+     * Vytvoří novou instanci FileReader pro práci se soubory
+     * </summary>*/
     public FileReader(SitesHolder sitesHolder)
     {
         _sitesHolder = sitesHolder;
     }
     
+    /**<summary>
+     * Zpracuje GET požadavek na soubor a vrátí odpovídající data s HTTP kódem
+     *
+     * Pokud uživatel chce nějaký obrázek, nebo jiný podobný obsah, tak se přímo načte ze souborového systému
+     * Soubory css se vezmou ze se složek app a components directory
+     *
+     * Pokud uživatel chce html stránku, tak ta se dynamicky vygeneruje pomocí SiteHolder
+     * </summary>*/
     public (int, byte[]) GetRequest(string file, UserSession session)
     {
-        //TODO implement getting css
         if (file.EndsWith(".html") || file.EndsWith("/") || !file.Contains('.'))
         {
             string? page = _sitesHolder.RenderPage(file, session);
@@ -44,7 +54,6 @@ class FileReader
             {
                 
                 filePath = Path.Join(" app", file);
-                Console.WriteLine(filePath);
             }
             byte[] fileData = ReadFile( "", filePath);
             return ((fileData == Array.Empty<byte>() ? 404 : 200), fileData);
@@ -101,7 +110,6 @@ class FileReader
      * </summary>*/
     private byte[] ReadFile(string folder, string filePath)
     {
-        Console.WriteLine(filePath);
         filePath = filePath.Substring(1);
 
         string pathSource = Path.Combine(Path.Combine(AppConstants.RootDirectory, folder), filePath);

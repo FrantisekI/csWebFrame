@@ -1,7 +1,18 @@
 namespace csWebFrame;
 
-public class HtmlCreator
+/**
+ * <summary>Pomocná funkce pro vytváření html stránek ve formě stringů
+ * </summary>
+ */
+public static class HtmlCreator
 {
+    
+    /**
+     * <summary>Dostane na vstupu objekt tlačítka a z něj vytvoří html string, který je pak použit
+     * ve stránce, proměnná action se dosadí do atributu u form elementu a slouží k zaslání správného
+     * POST requestu při stisku talčítka 
+     * </summary>
+     */
     public static string CreateButtonElement(Button button, string action)
     {
         string html = $"<form action=\"{action}\" class=\"{button.FormClass}\" id=\"{button.FormId}\" method=\"POST\">\n";
@@ -26,7 +37,7 @@ public class HtmlCreator
     }
 
     /**<summary>
-     * Vrati stranku jako string - nacte html a v nem nahradi {{var}} promennymi co vygeneruje
+     * Vrati stranku jako string - nacte html a v nem nahradi {{var}} proměnými co vygeneruje
      * prislusny obekt
      * </summary>*/
     public static string RenderNode(DefaultHtmlComponent node, UserSession session, PostUrl postUrl)
@@ -37,7 +48,6 @@ public class HtmlCreator
             htmlPath = Path.Combine(AppConstants.RootDirectory, "components", node.HtmlPathFromComponentRoot);
         }
 
-        Console.WriteLine(htmlPath);
         if (htmlPath == null)
         {
             Console.WriteLine($"there is no path to html in {node.GetType().Name}");
@@ -52,8 +62,7 @@ public class HtmlCreator
             {
                 PostUrl newPostUrl = postUrl;
                 newPostUrl.AddNestedComponent(key);
-                Console.WriteLine("KEY " + key);
-                Console.WriteLine(((DefaultHtmlComponent)variables[key]).GetVariables(session));
+
                 value = ((DefaultHtmlComponent)variables[key]).GetHtml(session, newPostUrl);
             }
             else

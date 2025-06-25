@@ -6,49 +6,90 @@ using System.Linq;                    // For LINQ operations in cleanup
 using System.Collections.Generic;     // For collections
 using System.Net;                       // For HttpListener directly
 
+/**<summary>
+ * Třída pro správu uživatelské relace a jejích proměnných
+ * funkce z této třídy jsou určeny čistě pro interní funkce programu, není implementován error handeling
+ * pro tvorbu stránek používejte SessionVar
+ * </summary>*/
 public class UserSession
 {
+    /**<summary>
+     * Vytvoří novou uživatelskou relaci
+     * </summary>*/
     public UserSession(string id, DateTime lastActivity)
     {
-        
+        this.LastActivity = lastActivity;
     }
     private readonly Dictionary<Type, SessionVariableBase> _variables = new Dictionary<Type, SessionVariableBase>();
     public DateTime LastActivity { get; set; }
+    /**<summary>
+     * Kontroluje, zda je proměnná daného typu nastavena v relaci
+     * </summary>*/
     public bool IsVarSet(Type variableKey)
     {
+        LastActivity = DateTime.UtcNow;
         return _variables.ContainsKey(variableKey);
     }
 
+    /**<summary>
+     * Získá hodnotu proměnné daného typu z relace
+     * </summary>*/
     public T GetVar<T>(Type variableKey)
     {
+        LastActivity = DateTime.UtcNow;
         return (T)_variables[variableKey].Var;
     }
 
+    /**<summary>
+     * Vytvoří novou proměnnou v relaci
+     * </summary>*/
     public void CreateVar(Type variableKey, SessionVariableBase variableHolder)
     {
+        LastActivity = DateTime.UtcNow;
         _variables.Add(variableKey, variableHolder);
     }
+    /**<summary>
+     * Nastaví hodnotu existující proměnné v relaci
+     * </summary>*/
     public void SetVar<T>(Type variableKey, T value)
     {
+        LastActivity = DateTime.UtcNow;
         _variables[variableKey].Set(value);
     }
 }
 
+/**<summary>
+ * Obal na Proměnné v UserSession, aby se dali uložit do datové struktury
+ * </summary>*/
 public class SessionVariableBase(object value)
 {
     public object Var {get; private set;} = value;
 
+    /**<summary>
+     * Nastaví hodnotu proměnné
+     * </summary>*/
     public void Set(object value)
     {
         Var = value;
     }
 }
 
+/**<summary>
+ * Typově bezpečná třída pro práci s relačními proměnnými
+ * všechny instance této třídy se stejnou UserSession odpovídají stejné proměnné, pokud
+ * potřebujete třeba list, tak vytvořte SessionVar<type[]> 
+ *
+ * tvoří se class "Number"(UserSession s, int i) : SessionVar<int>(s, i);
+ *
+ * </summary>*/
 public abstract class SessionVar<TVar>
 {
     private readonly UserSession _session; //this should be a reference to global UserSession 
-    
-    public SessionVar(UserSession session, TVar defaultValue)
+
+    /**<summary>
+     * Vytvoří novou relační proměnnou s výchozí hodnotou
+     * </summary>*/
+    protected SessionVar(UserSession session, TVar defaultValue)
     {
         _session = session;
         if (!session.IsVarSet(this.GetType()))
@@ -57,18 +98,23 @@ public abstract class SessionVar<TVar>
             session.CreateVar(this.GetType(), variableHolder);
         }
     }
+    /**<summary>
+     * Získá hodnotu proměnné z relace
+     * </summary>*/
     public TVar Get()
     {
         return _session.GetVar<TVar>(this.GetType());
     }
+    /**<summary>
+     * Nastaví hodnotu proměnné v relaci
+     * </summary>*/
     public void Set(TVar value)
     {
         _session.SetVar(this.GetType(), value);
     }
     /**
-     * Pori posilani POST requestu od usera dostane funkce post data, ty preda teto funkci
-     * a pokud v datech je promenna a ve spravnem formatu, vrati true a nastavi tuto hodnotu
-     * jinak jen vrati false
+     * Z POST requestu od usera dostaneme proměnné, session proměnnou můžeme nastavit z nich, to uděláme tak,
+     * že vrátíme 
     */
     public bool SetFromUserData(string key, Dictionary<string, string> userData)
     {
@@ -91,18 +137,28 @@ public abstract class SessionVar<TVar>
         return true;
     }
 
+    /**<summary>
+     * Nastaví hodnotu z uživatelských dat podle názvu typu, protože proměnné jsou stejně rozlišovány podle jejich třídy
+     * 
+     * </summary>*/
     public bool SetFromUserData(Dictionary<string, string> userData)
     {
         return SetFromUserData(this.GetType().Name, userData);
     }
 }
 
+/**<summary>
+ * Správce relací pro webovou aplikaci
+ * </summary>*/
 public class SessionManager
 {
     private readonly ConcurrentDictionary<string, UserSession> _sessions = new();
     private readonly Timer _cleanupTimer;
     private int _timeoutMinutes = 30;
     
+    /**<summary>
+     * Vytvoří nového správce relací s pravidelným čištěním
+     * </summary>*/
     public SessionManager()
     {
         // Clean up expired sessions every 10 minutes
@@ -110,6 +166,9 @@ public class SessionManager
             TimeSpan.FromMinutes(10), TimeSpan.FromMinutes(10));
     }
     
+    /**<summary>
+     * Získá existující nebo vytvoří novou relaci pro požadavek
+     * </summary>*/
     public UserSession GetOrCreateSession(HttpListenerRequest request, HttpListenerResponse response)
     {
         string? sessionId = GetSessionIdFromCookie(request);
@@ -123,6 +182,9 @@ public class SessionManager
         return CreateNewSession(response);
     }
     
+    /**<summary>
+     * Vytvoří novou relaci a nastaví cookie
+     * </summary>*/
     private UserSession CreateNewSession(HttpListenerResponse response)
     {
         string sessionId = Guid.NewGuid().ToString();
@@ -133,6 +195,9 @@ public class SessionManager
         
         return session;
     }
+    /**<summary>
+     * Získá ID relace z cookie v požadavku
+     * </summary>*/
     private string? GetSessionIdFromCookie(HttpListenerRequest request)
     {
         var sessionCookie = request.Cookies["SessionId"];
@@ -140,6 +205,9 @@ public class SessionManager
         return sessionCookie.Value;
     }
 
+    /**<summary>
+     * Nastaví cookie s ID relace v odpovědi
+     * </summary>*/
     private void SetSessionCookie(HttpListenerResponse response, string sessionId)
     {
         var cookie = new Cookie("SessionId", sessionId)
@@ -153,6 +221,9 @@ public class SessionManager
         response.Cookies.Add(cookie);
     }
     
+    /**<summary>
+     * Odstraní vypršelé relace ze slovníku
+     * </summary>*/
     private void CleanupExpiredSessions(object state)
     {
         var cutoff = DateTime.UtcNow.AddMinutes(-_timeoutMinutes); // 30 min timeout

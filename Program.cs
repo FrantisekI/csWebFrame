@@ -51,6 +51,14 @@ namespace csWebFrame
             }
             listener.Stop();
         }
+        
+        /**<summary>
+         * Zpracuje request a vrati odpoved, rozdělení, kvůli multithredingu
+         * Pokud dostane GET request, tak vrátí rovnou požadovaný soubor, nebo 404 error
+         *
+         * Pokud dostane POST request, tak ho zpracuje ve vniřní logice a vrátí kód 303 a
+         * stránku na kterou má klient přejít, ten pak opět pošle GET request (post-redirect-get metoda)
+         * </summary>*/
         private static void HandleRequest(HttpListenerContext context, FileReader fileReader, 
             SessionManager sessionManager, SitesHolder sitesHolder)
         {

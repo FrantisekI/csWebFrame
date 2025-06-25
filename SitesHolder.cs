@@ -3,8 +3,10 @@ using System.Reflection;
 
 namespace csWebFrame;
 /**<summary>
- * Drzi stromovou strukturu stranek aplikace, kdyz dostane GET request, tak skombinuje stranky v html
- * s tim co vrati napsane prislusne funkce v .cs
+ * Drzi stromovou strukturu stranek aplikace, kdyz dostane GET request, tak vrátí odpovídající html
+ * každý vrchol ve stromu odpovídá html stránce, nebo jejímu "obalu"
+ *
+ * Na POST request vvyřeší opět logiku unvitř 
  * </summary>*/
 public class SitesHolder
 {
@@ -17,10 +19,12 @@ public class SitesHolder
     }
     
     /**<summary>
-     * Vytvari stromvou strukturu adresaru
+     * Rekurzivně vytvari stromvou strukturu adresářů
      *
      * vrati SiteNode se strankou korespondujici ke zdejsimu layout.html/cs a jako potomky ma
      * podadresare slozky
+     *
+     * tvorba se provádí jednou při inicializování projektu
      * </summary>*/
     private SiteNode CreateTree(string path)
     {
@@ -58,8 +62,8 @@ public class SitesHolder
     }
     
     /**<summary>
-     * na vstupu dostane 
-     * Popravde si uplne nejsem jisty, jak funguje
+     * zařídí, že SiteNode bude ukazovat na zkompilovanou třídu odvozenou od DefaultPage,
+     * od ní se pak za běhu vytváří instance (nevím úplně jak to funguje)
      * </summary>*/
     private void CreateSiteExecutable(ref SiteNode node) /// dostane cestu, ktera se muze jmenovat index.html
     {
@@ -103,8 +107,12 @@ public class SitesHolder
 
 
     /**<summary>
-     * handles the buttonClick a vrati redirect cestu,
-     * pokud nenajde stranku, nebo se neco pokazi, vrati null, a meli bychom odpovedet 400
+     * Reaguje na POST request, interně zpracuje POST data a pak vrátí redirect správu
+     * url - je hlavička post Requestu, (to co tvoří PostUrl struct), podle toho se pozná, komu daný
+     * request patří
+     * data - jsou předzpracovaná data z POST body
+     *
+     * pokud se něco pokazí, vrátí null 
      */
     public string? PostRequest(string url, Dictionary<string, string> data, UserSession session)
     {
@@ -151,11 +159,6 @@ public class SitesHolder
         {
             
             Dictionary<string, object> variables = ((DefaultHtmlComponent)currentComponent).GetVariables(session);
-            Console.WriteLine("the key is " + componentKey[i]);
-            foreach (string key in variables.Keys)
-            {
-                Console.WriteLine(key + " " + variables[key]);
-            }
             
             if (!variables.ContainsKey(componentKey[i]))
             {
@@ -217,7 +220,14 @@ public class SitesHolder
         SiteNode? notFoundNode = _rootNode.GoToNext("404");
         return notFoundNode != null ? HtmlCreator.RenderNode(notFoundNode, session, new PostUrl("/", 0)) : "404 Page Not Found";
     }
-
+    
+    /**
+     * <summary>Pomocná funkce, která dostane na vstupu hledané url od uživatele, upraví ho, od zbytečných lomítek a
+     * přebívajících cest - tuto cestu poté také vrátí
+     *
+     * pokud hledaná stránka existuje, vrátí její objekt
+     * </summary>
+     */
     public (SiteNode?, string) FindNode(string url)
     {
         /// Dojde ke slozce, kterou chce uzivatel otevrit a overi si, jestli existuje
