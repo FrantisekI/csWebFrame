@@ -46,16 +46,19 @@ class FileReader
         else if (file.EndsWith(".css"))
         {
             string filePath;
-            if (file.StartsWith("components"))
+            if (file.StartsWith("/components"))
             {
-                 filePath = Path.Join(" components", file);
+                filePath = "." + file;
+            }
+            else if (file.StartsWith("/src"))
+            {
+                filePath = "." + file;
             }
             else
             {
-                
-                filePath = Path.Join(" app", file);
+                filePath = Path.Join("./app", file);
             }
-            byte[] fileData = ReadFile( "", filePath);
+            byte[] fileData = File.ReadAllBytes(Path.Combine(AppConstants.RootDirectory, filePath));
             return ((fileData == Array.Empty<byte>() ? 404 : 200), fileData);
         }
         else
