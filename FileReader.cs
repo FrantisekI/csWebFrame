@@ -17,7 +17,7 @@ class FileReader
         _sitesHolder = sitesHolder;
     }
     
-    public (int, byte[]) GetRequest(string file, UserSession session) //TODO: might need rename
+    public (int, byte[]) GetRequest(string file, UserSession session)
     {
         //TODO implement getting css
         if (file.EndsWith(".html") || file.EndsWith("/") || !file.Contains('.'))
@@ -32,6 +32,22 @@ class FileReader
 
             return (statusCode, Encoding.UTF8.GetBytes(page));
 
+        }
+        else if (file.EndsWith(".css"))
+        {
+            string filePath;
+            if (file.StartsWith("components"))
+            {
+                 filePath = Path.Join(" components", file);
+            }
+            else
+            {
+                
+                filePath = Path.Join(" app", file);
+                Console.WriteLine(filePath);
+            }
+            byte[] fileData = ReadFile( "", filePath);
+            return ((fileData == Array.Empty<byte>() ? 404 : 200), fileData);
         }
         else
         {

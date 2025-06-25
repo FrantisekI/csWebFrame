@@ -124,7 +124,7 @@ public class SitesHolder
         }
 
         string pathToButton = pathParts[0];
-        string[] componentKey = pathParts[2].Split("/"); //TODO split by / and get only the nessesery key;
+        string[] componentKey = pathParts[2].Split("/"); 
         int len = componentKey.Length;
         (SiteNode? buttonContainer, _) = FindNode(pathToButton);
         if (buttonContainer == null)

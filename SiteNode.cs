@@ -18,7 +18,6 @@ public abstract class DynamicHtmlComponent()
  * </summary>*/
 public class SiteNode : DefaultHtmlComponent
 {
-    //TODO take care of visibility
     public Type? PageType; // type should be inherit from DefaultSite
     public readonly Dictionary<string, SiteNode>? Next;
     public SiteNode? Previous;
@@ -158,5 +157,3 @@ public abstract class Button : DefaultHtmlComponent
     }
     public abstract void OnClick(Dictionary<string, string> data);
 }
-// TODO create abstract class for Layouts - so it will be initilized with child
-// and than read variables from it to use them somewhere
