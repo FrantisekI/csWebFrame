@@ -1,3 +1,5 @@
+using csWebFrame.components;
+
 namespace csWebFrame.app.about.bob;
 
 public class Counter(UserSession s, int val) : SessionVar<int>(s, val)
@@ -52,6 +54,7 @@ public class Layout(UserSession s) : DefaultPage(s)
         WritePoem textB = new WritePoem(text);
         textB.AddFormElement(new Button.InputElementAtrributes(Button.InputElementAtrributes.PossibleAttributes.input, "text", "poem"));
         textB.Name = "Poem";
+        Console.WriteLine("in layout");
         // counter.Increment();
         return new Dictionary<string, object>
         {
@@ -59,6 +62,7 @@ public class Layout(UserSession s) : DefaultPage(s)
             ["counter"] = countUp,
             ["poem"] = textB,
             ["text"] = text.Get(),
+            ["pretty"] = new PrettyText()
         };
     }
 }

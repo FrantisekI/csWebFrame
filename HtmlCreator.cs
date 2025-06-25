@@ -29,46 +29,56 @@ public class HtmlCreator
      * Vrati stranku jako string - nacte html a v nem nahradi {{var}} promennymi co vygeneruje
      * prislusny obekt
      * </summary>*/
-    public static string RenderNode(SiteNode node, UserSession session, PostUrl postUrl)
+    public static string RenderNode(DefaultHtmlComponent node, UserSession session, PostUrl postUrl)
     {
-        if (node.Path == null) return "";
-        
-        string pageContent = File.ReadAllText(node.Path);
-        if (node.PageType != null)
+        string? htmlPath = node.HtmlPath;
+        if (node.HtmlPathFromComponentRoot != null)
         {
-            DefaultPage pageClassObject = (DefaultPage)Activator.CreateInstance(node.PageType, session)!;
-            Dictionary<string, object> variables = pageClassObject.Render();
-            foreach (string key in variables.Keys)
-            {
-                string value;
-                if (typeof(DefaultHtmlComponent).IsAssignableFrom(variables[key].GetType()))
-                {
-                    PostUrl newPostUrl = postUrl;
-                    newPostUrl.AddNestedComponent(key);
-                    value = ((DefaultHtmlComponent)variables[key]).GetHtml(session, newPostUrl);
-                }
-                else
-                {
-                    value = variables[key].ToString();
-                }
-
-                pageContent = pageContent.Replace($"{{{{{key}}}}}", value);
-                // double braces marge to form one ^^
-            }
+            htmlPath = Path.Combine(AppConstants.RootDirectory, "components", node.HtmlPathFromComponentRoot);
         }
+
+        Console.WriteLine(htmlPath);
+        if (htmlPath == null)
+        {
+            Console.WriteLine($"there is no path to html in {node.GetType().Name}");
+        }
+        string pageContent = File.ReadAllText(htmlPath);
+        
+        Dictionary<string, object> variables = node.GetVariables(session);
+        foreach (string key in variables.Keys)
+        {
+            string value;
+            if (typeof(DefaultHtmlComponent).IsAssignableFrom(variables[key].GetType()))
+            {
+                PostUrl newPostUrl = postUrl;
+                newPostUrl.AddNestedComponent(key);
+                Console.WriteLine("KEY " + key);
+                Console.WriteLine(((DefaultHtmlComponent)variables[key]).GetVariables(session));
+                value = ((DefaultHtmlComponent)variables[key]).GetHtml(session, newPostUrl);
+            }
+            else
+            {
+                value = variables[key]?.ToString() ?? "";
+            }
+
+            pageContent = pageContent.Replace($"{{{{{key}}}}}", value);
+            // double braces marge to form one ^^
+        }
+        
         return pageContent;
     }
     /**<summary>
      * Pro slozky ktere mohou obsahovat layout.
      * Zmeni layout obsahujici child, pokud layout neexistuje, nic se nezmeni
+     * muze byt pouzit pouze na SiteNode
      * </summary>*/
     public static void RenderNode(SiteNode node, UserSession session, ref string child, PostUrl postUrl)
     {
-        if (node.Path == null) return;
+        if (node.HtmlPath == null) return;
         string parent = RenderNode(node, session, postUrl);
         if (!parent.Contains("{{child}}"))
         {
-            child = $"Layout page {node.Path} does not contain {{child}}";
+            child = $"Layout page {node.HtmlPath} does not contain {{child}}";
             return;
         }
         child = parent.Replace("{{child}}", child);

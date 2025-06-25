@@ -22,11 +22,10 @@ public class SiteNode : DefaultHtmlComponent
     public Type? PageType; // type should be inherit from DefaultSite
     public readonly Dictionary<string, SiteNode>? Next;
     public SiteNode? Previous;
-    public readonly string? Path;
 
-    public SiteNode(string? path, Dictionary<string, SiteNode>? successors)
+    public SiteNode(string? htmlPath, Dictionary<string, SiteNode>? successors)
     {
-        this.Path = path;
+        this.HtmlPath = htmlPath;
         Next = successors;
         if (Next != null) foreach (SiteNode node in Next.Values)
         {
@@ -48,6 +47,7 @@ public class SiteNode : DefaultHtmlComponent
     }
     public override string GetHtml(UserSession session, PostUrl postUrl)
     {
+        if (HtmlPath == null) return "";
         postUrl.NewComponent("");
         return HtmlCreator.RenderNode(this, session, postUrl);
     }

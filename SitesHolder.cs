@@ -63,8 +63,8 @@ public class SitesHolder
      * </summary>*/
     private void CreateSiteExecutable(ref SiteNode node) /// dostane cestu, ktera se muze jmenovat index.html
     {
-        if (node.Path == null) return;
-        string filePath = node.Path;
+        if (node.HtmlPath == null) return;
+        string filePath = node.HtmlPath;
         string relativePath = filePath.Remove(0, AppConstants.AppDir.Length + 1); // +1 to remove the leading slash
         string namespacePath = "csWebFrame.app." + Path.GetDirectoryName(relativePath)!.Replace("/", ".").Replace("\\", ".");
         string className = Path.GetFileNameWithoutExtension(filePath);
@@ -124,47 +124,64 @@ public class SitesHolder
         }
 
         string pathToButton = pathParts[0];
-        string buttonKey = pathParts[2];
+        string[] componentKey = pathParts[2].Split("/"); //TODO split by / and get only the nessesery key;
+        int len = componentKey.Length;
         (SiteNode? buttonContainer, _) = FindNode(pathToButton);
         if (buttonContainer == null)
         {
             Console.WriteLine("Request path not found");
             return null;
         }
-        if (buttonContainer.Path == null) return "";
+        if (buttonContainer.HtmlPath == null) return "";
         
         for (int i = 0; i < indexFromEnd; i++)
         {
             buttonContainer = buttonContainer.Previous;
         }
-        if (buttonContainer.PageType != null)
+
+        if (buttonContainer == null)
         {
-            DefaultPage pageClassObject = (DefaultPage)Activator.CreateInstance(buttonContainer.PageType, session)!;
-            Console.WriteLine("searching in" + pageClassObject.GetType().Name);
-            Dictionary<string, object> variables = pageClassObject.Render();
-            if (!variables.ContainsKey(buttonKey))
+            Console.WriteLine("Requested path not found");
+            return null;
+        }
+        
+        
+        object currentComponent = buttonContainer;
+        for (int i = 0; i < len; i++)
+        {
+            
+            Dictionary<string, object> variables = ((DefaultHtmlComponent)currentComponent).GetVariables(session);
+            Console.WriteLine("the key is " + componentKey[i]);
+            foreach (string key in variables.Keys)
             {
-                Console.WriteLine($"Button named {buttonKey} not found");
+                Console.WriteLine(key + " " + variables[key]);
+            }
+            
+            if (!variables.ContainsKey(componentKey[i]))
+            {
+                Console.WriteLine($"Button named {componentKey[i]} not found");
                 return null;
             }
-            object potentialButton = variables[buttonKey];
-            
-            if (typeof(Button).IsAssignableFrom(potentialButton.GetType()))
-            {
-                Button button = (Button)potentialButton;
-                button.OnClick(data);
-                if (button.Redirect == null)
-                {
-                    if (pathToButton.EndsWith("index"))
-                    {
-                        return pathToButton.Substring(0, pathToButton.Length - "index".Length);
-                    }
-                    return pathToButton;
-                }
-                return button.Redirect;
-            }
-            
+            currentComponent = variables[componentKey[i]];
         }
+        
+
+        if (typeof(Button).IsAssignableFrom(currentComponent.GetType()))
+        {
+            Button button = (Button)currentComponent;
+            button.OnClick(data);
+            Console.WriteLine("Pressed Button " + button.Redirect);
+            if (button.Redirect == null)
+            {
+                if (pathToButton.EndsWith("index"))
+                {
+                    return pathToButton.Substring(0, pathToButton.Length - "index".Length);
+                }
+                return pathToButton;
+            }
+            return button.Redirect;
+        }
+
         Console.WriteLine("Pressed Button has not been found.");
         return null;
     }

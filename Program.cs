@@ -42,7 +42,7 @@ namespace csWebFrame
             SitesHolder sitesHolder = new SitesHolder();
             FileReader fileReader = new FileReader(sitesHolder);
             SessionManager sessionManager = new SessionManager();
-            while (listener.IsListening) //TODO implement Multithreding
+            while (listener.IsListening)
             {
                 // Note: The GetContext method blocks while waiting for a request.
                 HttpListenerContext context = listener.GetContext();
