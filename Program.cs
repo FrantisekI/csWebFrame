@@ -13,7 +13,7 @@ namespace csWebFrame
     {
         static void Main(string[] args)
         {
-            Listener(new string[] { "http://192.168.0.105:8060/" });
+            Listener(new string[] { File.ReadAllText(Path.Join(AppConstants.RootDirectory, "urls.txt")) });
         }
 
         /**<summary>
