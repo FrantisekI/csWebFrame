@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .navigation ul {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            gap: 20px;
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .navigation a {
+            text-decoration: none;
+            color: #333;
+            padding: 8px 16px;
+            border-radius: 3px;
+        }
+        .navigation a:hover, .nav-active {
+            background: #007bff;
+            color: white;
+        }
+        .zvire-component {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+        .animals-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        .footer {
+            background: #28a745;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            margin-top: 40px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>{{title}}</h1>
+    {{navigation}}
+    
+    <p>Vítejte v sekci zvířátek! Toto je ukázka použití layoutu a komponent.</p>
+    
+    <div class="animals-grid">
+        {{dog}}
+        {{cat}}
+        {{rabbit}}
+    </div>
+</body>
+</html>

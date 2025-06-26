@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #ffeaa7, #fab1a0);
+            min-height: 100vh;
+        }
+        .navigation ul {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            gap: 20px;
+            background: #fdcb6e;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .navigation a {
+            text-decoration: none;
+            color: #333;
+            padding: 8px 16px;
+            border-radius: 3px;
+        }
+        .navigation a:hover, .nav-active {
+            background: #e17055;
+            color: white;
+        }
+        .micka-container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .micka-info {
+            background: #ffeaa7;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 5px solid #fdcb6e;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .stat-box {
+            background: #74b9ff;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        h1 {
+            color: #e17055;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .paw-prints {
+            font-size: 2em;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>{{title}} 🐱</h1>
+    {{navigation}}
+    
+    <div class="micka-container">
+        <div class="paw-prints">🐾 🐾 🐾</div>
+        
+        {{mickaComponent}}
+        
+        <div class="micka-info">
+            <h3>O Micce</h3>
+            <p>{{popis}}</p>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-box">
+                <h4>Počet návštěv</h4>
+                <p><strong>{{navstev}}</strong></p>
+            </div>
+            <div class="stat-box">
+                <h4>Aktuální nálada</h4>
+                <p><strong>{{nalada}}</strong></p>
+            </div>
+        </div>
+        
+        <div class="paw-prints">🐾 🐾 🐾</div>
+    </div>
+</body>
+</html>

@@ -88,8 +88,8 @@ namespace csWebFrame
                 if (request.HttpMethod == "GET")
                 {
                     
-                    
-                    (statusCode, buffer) = fileReader.GetRequest(request.Url.AbsolutePath, session);
+                    string decodedPath = HttpUtility.UrlDecode(request.Url.AbsolutePath);
+                    (statusCode, buffer) = fileReader.GetRequest(decodedPath, session);
                     
                     response.ContentLength64 = buffer.Length;
                     output.Write(buffer, 0, buffer.Length);

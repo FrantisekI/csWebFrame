@@ -1,0 +1,13 @@
+<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="200" fill="#90EE90" rx="10"/>
+  <ellipse cx="100" cy="100" rx="40" ry="30" fill="#FFFFFF"/>
+  <circle cx="90" cy="90" r="4" fill="#000"/>
+  <circle cx="110" cy="90" r="4" fill="#000"/>
+  <ellipse cx="100" cy="95" rx="2" ry="1" fill="#FFC0CB"/>
+  <path d="M 95 100 Q 100 105 105 100" stroke="#FFC0CB" stroke-width="2" fill="none"/>
+  <ellipse cx="80" cy="75" rx="8" ry="12" fill="#FFFFFF"/>
+  <ellipse cx="120" cy="75" rx="8" ry="12" fill="#FFFFFF"/>
+  <ellipse cx="100" cy="120" rx="5" ry="3" fill="#FFFFFF"/>
+  <circle cx="100" cy="130" r="2" fill="#FFFFFF"/>
+  <text x="100" y="180" text-anchor="middle" font-family="Arial" font-size="16" fill="#333">🐰 Králík</text>
+</svg>

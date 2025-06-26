@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .navigation ul {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            gap: 20px;
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .navigation a {
+            text-decoration: none;
+            color: #333;
+            padding: 8px 16px;
+            border-radius: 3px;
+        }
+        .navigation a:hover, .nav-active {
+            background: #007bff;
+            color: white;
+        }
+        .info-box {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>{{title}}</h1>
+    {{navigation}}
+    
+    <div class="info-box">
+        <h2>O {{framework}}</h2>
+        <p><strong>{{framework}}</strong> je webový framework pro C# vytvořený {{author}} v roce {{year}}.</p>
+        
+        <h3>Hlavní funkce:</h3>
+        <ul>
+            <li>🔄 <strong>UserSession</strong> - správa uživatelských relací s automatickým čištěním</li>
+            <li>🧩 <strong>Komponenty</strong> - znovupoužitelné HTML komponenty s logikou</li>
+            <li>🎯 <strong>SessionVar</strong> - typově bezpečné relační proměnné</li>
+            <li>🔘 <strong>Tlačítka</strong> - interaktivní prvky s podporou formulářů</li>
+            <li>🎨 <strong>Layouty</strong> - hierarchická struktura stránek</li>
+            <li>🗂️ <strong>Automatické směrování</strong> - podle složkové struktury</li>
+        </ul>
+        
+        <h3>Ukázky implementace:</h3>
+        <p>Tato aplikace demonstruje všechny příklady kódu z README.md:</p>
+        <ul>
+            <li>DefaultPage s metodou Render()</li>
+            <li>ZvireComponent s ImageComponent</li>
+            <li>SessionVar pro Counter a Text</li>
+            <li>Button pro SendText</li>
+            <li>Layout pro sekci zvířátek</li>
+        </ul>
+    </div>
+    
+    <div class="info-box">
+        <h3>Technické detaily:</h3>
+        <p><strong>Framework:</strong> .NET 9</p>
+        <p><strong>Platforma:</strong> Linux</p>
+        <p><strong>Architektura:</strong> Model-View-Component s automatickým směrováním</p>
+    </div>
+</body>
+</html>

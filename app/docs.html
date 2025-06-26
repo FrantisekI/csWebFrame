@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .navigation ul {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            gap: 20px;
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .navigation a {
+            text-decoration: none;
+            color: #333;
+            padding: 8px 16px;
+            border-radius: 3px;
+        }
+        .navigation a:hover, .nav-active {
+            background: #007bff;
+            color: white;
+        }
+        .section {
+            margin: 30px 0;
+            padding: 20px;
+            border-left: 4px solid #28a745;
+            background: #f8f9fa;
+            border-radius: 0 5px 5px 0;
+        }
+        .component-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: #fff;
+        }
+        .architecture-diagram {
+            background: #e7f3ff;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+        }
+        .pros-cons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .pros {
+            background: #d4edda;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #28a745;
+        }
+        .cons {
+            background: #f8d7da;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #dc3545;
+        }
+        .flow-diagram {
+            background: #fff3cd;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            border-left: 4px solid #ffc107;
+        }
+        h2 {
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 5px;
+        }
+        h3 {
+            color: #666;
+            margin-top: 25px;
+        }
+        code {
+            background: #f8f8f8;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        .highlight {
+            background: #fff3cd;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>{{title}}</h1>
+    <p><em>{{subtitle}}</em></p>
+    
+    {{navigation}}
+    
+    <div class="section">
+        <h2>🏗️ Architektura csWebFrame</h2>
+        <div class="architecture-diagram">
+HTTP Request → HttpListener → FileReader → SitesHolder → UserSession<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HTML Response
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📡 Http Listener</h2>
+        <div class="component-section">
+            <h3>Účel</h3>
+            <p>Http listener je kopií z <strong>oficiální dokumentace Microsoftu</strong> obohacená o Multithreading.</p>
+            
+            <h3>Funkce</h3>
+            <ul>
+                <li>Poslouchá na předem definované adrese (z <code>urls.txt</code>)</li>
+                <li>Odpovídá na HTTP dotazy</li>
+                <li>Podporuje vícevláknové zpracování</li>
+                <li>Deleguje zpracování na <code>FileReader</code></li>
+            </ul>
+            
+            <div class="flow-diagram">
+                <strong>Flow:</strong> Příchozí HTTP Request → Multithreading → FileReader
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📁 FileReader</h2>
+        <div class="component-section">
+            <h3>Rozhodování podle typu requestu</h3>
+            <ul>
+                <li><strong>GET Request:</strong>
+                    <ul>
+                        <li>Soubory (obrázky, CSS, JS) → přečte ze souborového systému</li>
+                        <li>Stránky → deleguje na <code>SitesHolder</code></li>
+                    </ul>
+                </li>
+                <li><strong>POST Request:</strong> Rovnou řeší <code>SitesHolder</code></li>
+            </ul>
+            
+            <div class="flow-diagram">
+                <strong>GET Flow:</strong> URL analýza → Soubor? → FileSystem | Stránka? → SitesHolder<br>
+                <strong>POST Flow:</strong> POST data → SitesHolder
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🌳 SitesHolder</h2>
+        <div class="component-section">
+            <h3>Stromová struktura stránek</h3>
+            <p>Při startu se načtou všechny stránky z adresáře <code>app</code> a vytvoří se stromová struktura.</p>
+            
+            <h3>SiteNode - vrchol stromu</h3>
+            <ul>
+                <li>Ukazatel na zkompilovanou stránku</li>
+                <li>Odkazy na potomky a předka</li>
+                <li>Uložený layout (pokud není list)</li>
+                <li>Index jako potomek</li>
+            </ul>
+            
+            <div class="highlight">
+                <strong>Proč strom a ne hash tabulka?</strong><br>
+                Stromová struktura umožňuje snadné dohledávání layoutů rodičů.
+            </div>
+            
+            <h3>Zpracování GET requestu</h3>
+            <div class="flow-diagram">
+                1. Ověří existenci stránky (404 pokud neexistuje)<br>
+                2. Vygeneruje HTML z poslední stránky<br>
+                3. Postupuje k rodiči a přidává layouty kolem
+            </div>
+            
+            <h3>Zpracování POST requestu</h3>
+            <div class="flow-diagram">
+                1. Najde stránku pro kterou je POST určen<br>
+                2. Najde komponentu která má data zpracovat<br>
+                3. Zpracuje data<br>
+                4. Vrátí status 303 + redirect URL<br>
+                5. Browser automaticky pošle GET request
+            </div>
+            
+            <div class="highlight">
+                <strong>Proč 303 redirect?</strong><br>
+                Pokud by se rovnou vrátila stránka, browser by se zeptal o možnou ztrátu poslaných dat.
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>👤 UserSession</h2>
+        <div class="component-section">
+            <h3>Původní vs. Finální řešení</h3>
+            <div class="highlight">
+                <strong>Původní myšlenka:</strong> Jedna velká třída pro všechny proměnné<br>
+                <strong>Problém:</strong> Neintuitivní a typově nebezpečné<br>
+                <strong>Řešení:</strong> <code>SessionVar&lt;TVar&gt;</code> - deklarace na jeden řádek
+            </div>
+            
+            <h3>Vlastnosti UserSession</h3>
+            <ul>
+                <li>Slovník: klíč = <code>Type</code> třídy, hodnota = instance</li>
+                <li>Každý uživatel má vlastní UserSession</li>
+                <li>Výběr podle cookie z HTTP requestu</li>
+                <li>Automatické čištění nepoužívaných sessions (každých 10 minut)</li>
+                <li>Persistence mezi requesty</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🧩 DefaultHtmlComponent</h2>
+        <div class="component-section">
+            <h3>Historie vývoje</h3>
+            <div class="highlight">
+                Byla vytvořena až v průběhu vývoje, takže původní třídy nebyly přepracovány na její základě.
+            </div>
+            
+            <h3>Výhody</h3>
+            <ul>
+                <li>Jednodušší opakovatelnost kódu</li>
+                <li>Sjednocené získávání HTML</li>
+                <li>Sjednocené reagování na POST</li>
+                <li>Bazální třída pro všechny komponenty</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🔗 PostUrl</h2>
+        <div class="component-section">
+            <h3>Účel</h3>
+            <p>Struct pro zjednodušení práce s POST requesty a jejich směrováním.</p>
+            
+            <h3>Struktura</h3>
+            <div class="flow-diagram">
+                PostUrl = cesta k stránce + "&" + index od konce + "&" + cesta ke komponentě
+            </div>
+            
+            <p>Zajišťuje správné směrování POST requestů na konkrétní komponenty.</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📊 Hodnocení frameworku</h2>
+        <div class="pros-cons">
+            <div class="pros">
+                <h3>✅ Klady</h3>
+                <ul>
+                    <li>Málo chyb během vývoje</li>
+                    <li>Nepotřebuje tolik rozšiřování</li>
+                    <li>Odlehčený způsob psaní malých webových aplikací</li>
+                    <li>Jednoduchá struktura</li>
+                    <li>Typová bezpečnost pomocí SessionVar</li>
+                </ul>
+            </div>
+            <div class="cons">
+                <h3>❌ Zápory</h3>
+                <ul>
+                    <li>Vyžaduje "strašně moc kódu"</li>
+                    <li>Přeskakování mezi .cs a .html soubory</li>
+                    <li>Přeskakování do komponent</li>
+                    <li>Nehodí se na větší aplikace</li>
+                    <li>Omezeno na linuxové systémy</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🎯 Závěr autora</h2>
+        <div class="highlight">
+            <p><em>"Neměl jsem úplně přesně specifikováno, co bych chtěl od programu, jelikož jsem si úplně nebyl jistý, co jde. Přijde mi, ale, že to zase tolik rozšiřování nepotřebuje, až se divím, že se objevuje tak málo chyb."</em></p>
+            
+            <p><em>"Na druhou stranu, přijde mi, že co je potřeba napsat vyžaduje strašně moc kódu, je potřeba přeskakovat mezi .cs a html soubory a do komponent. Je to takový odlehčený způsob, jak psát malé webové aplikace, ale na nic většího se to moc nehodí."</em></p>
+        </div>
+        
+        <h3>Shrnutí</h3>
+        <p>csWebFrame je experimentální framework určený pro <strong>malé webové aplikace</strong> s důrazem na:</p>
+        <ul>
+            <li>Jednoduchost použití</li>
+            <li>Typovou bezpečnost</li>
+            <li>Komponentový přístup</li>
+            <li>Sessionové proměnné</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>🔗 Související stránky</h2>
+        <ul>
+            <li><a href="/">Domovská stránka s README příklady</a></li>
+            <li><a href="/about">O aplikaci</a></li>
+            <li><a href="/zviratka">Ukázka složkové struktury</a></li>
+        </ul>
+    </div>
+</body>
+</html>
