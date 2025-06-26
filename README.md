@@ -1,6 +1,6 @@
 # csWebFrame Dokumentace
 
-csWebFrame je určen k vytváření webových aplikací v jazyce C#. 
+csWebFrame je určen k vytváření webových aplikací v jazyce C#. Kvůli používaným lomítkům funguje program pouze na linuxových systémech.
 
 ## Instalace
 naklonujte repozitář csWebFrame pomocí (do této složky pak budete ukládat vaši aplikaci):

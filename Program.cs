@@ -13,7 +13,13 @@ namespace csWebFrame
     {
         static void Main(string[] args)
         {
-            Listener(new string[] { File.ReadAllText(Path.Join(AppConstants.RootDirectory, "urls.txt")) });
+            string firstLine;
+            using (StreamReader reader = new StreamReader(Path.Join(AppConstants.RootDirectory, "urls.txt")))
+            {
+                firstLine = reader.ReadLine() ?? "";
+            }
+
+            Listener(new string[] { firstLine });
         }
 
         /**<summary>
@@ -35,6 +41,7 @@ namespace csWebFrame
             // Add the prefixes.
             foreach (string s in prefixes)
             {
+                System.Console.WriteLine("Prefix: " + s);
                 listener.Prefixes.Add(s);
             }
             listener.Start();

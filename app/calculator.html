@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}}</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 600px; 
+            margin: 0 auto; 
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        h1 { 
+            color: #333; 
+            margin-bottom: 30px;
+        }
+        .calculator-display {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            min-height: 60px;
+        }
+        .current-operation {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #495057;
+            margin-bottom: 10px;
+        }
+        .result {
+            font-size: 2em;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .error-message {
+            color: #dc3545;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .input-section {
+            background: #e9ecef;
+            border-radius: 8px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+        .input-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .input-row label {
+            font-weight: bold;
+            font-size: 1.1em;
+            min-width: 120px;
+            text-align: right;
+        }
+        .number-input {
+            padding: 12px 15px;
+            font-size: 1.3em;
+            border: 2px solid #ced4da;
+            border-radius: 5px;
+            width: 150px;
+            text-align: center;
+        }
+        .number-input:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+        .operation-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 30px 0;
+        }
+        .calc-button {
+            padding: 15px 25px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+        .add { background: #28a745; color: white; }
+        .add:hover { background: #218838; transform: translateY(-1px); }
+        
+        .subtract { background: #dc3545; color: white; }
+        .subtract:hover { background: #c82333; transform: translateY(-1px); }
+        
+        .multiply { background: #007bff; color: white; }
+        .multiply:hover { background: #0056b3; transform: translateY(-1px); }
+        
+        .divide { background: #fd7e14; color: white; }
+        .divide:hover { background: #e8590c; transform: translateY(-1px); }
+        
+        .clear {
+            background: #6c757d;
+            color: white;
+            grid-column: span 2;
+            margin-top: 10px;
+        }
+        .clear:hover { 
+            background: #5a6268; 
+            transform: translateY(-1px); 
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-top: 30px;
+            color: #007bff;
+            text-decoration: none;
+            font-size: 1.1em;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        .features-info {
+            margin-top: 20px; 
+            font-size: 0.9em; 
+            color: #666;
+        }
+        .features-info ul {
+            text-align: left; 
+            display: inline-block;
+        }
+        
+        /* JavaScript to sync the inputs */
+        .sync-inputs {
+            display: none;
+        }
+    </style>
+    <script>
+        function syncInputs() {
+            // Get the values from the main inputs
+            const firstNum = document.getElementById('firstNum').value;
+            const secondNum = document.getElementById('secondNum').value;
+            
+            // Update all hidden inputs in the buttons
+            document.querySelectorAll('input[name="firstNum"]').forEach(input => {
+                input.value = firstNum;
+            });
+            document.querySelectorAll('input[name="secondNum"]').forEach(input => {
+                input.value = secondNum;
+            });
+        }
+        
+        // Sync inputs when page loads and when inputs change
+        window.onload = function() {
+            document.getElementById('firstNum').addEventListener('input', syncInputs);
+            document.getElementById('secondNum').addEventListener('input', syncInputs);
+            syncInputs(); // Initial sync
+        };
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>{{title}}</h1>
+        
+        <div class="calculator-display">
+            <div class="current-operation">{{operation}}</div>
+            <div class="result">Result: {{result}}</div>
+            <div class="error-message">{{errorMessage}}</div>
+        </div>
+        
+        <div class="input-section">
+            <div class="input-row">
+                <label for="firstNum">First Number:</label>
+                <input type="number" id="firstNum" class="number-input" value="{{firstNumber}}">
+            </div>
+            <div class="input-row">
+                <label for="secondNum">Second Number:</label>
+                <input type="number" id="secondNum" class="number-input" value="{{secondNumber}}">
+            </div>
+        </div>
+        
+        <div class="operation-buttons">
+            {{addButton}}
+            {{subtractButton}}
+            {{multiplyButton}}
+            {{divideButton}}
+            {{clearButton}}
+        </div>
+        
+        <a href="/" class="back-link">← Back to Home</a>
+        
+        <div class="features-info">
+            <p>This calculator demonstrates:</p>
+            <ul>
+                <li>Clean two-input interface with separate operation buttons</li>
+                <li>Multiple session variables working together</li>
+                <li>Error handling (division by zero, invalid input)</li>
+                <li>Input validation and type conversion</li>
+                <li>JavaScript integration for input synchronization</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
